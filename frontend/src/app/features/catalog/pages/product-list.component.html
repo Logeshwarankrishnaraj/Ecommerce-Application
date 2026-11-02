@@ -1,0 +1,125 @@
+<div class="container page">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a routerLink="/">Home</a><span aria-hidden="true">›</span>
+    @if (categoryName() || q()) { <a routerLink="/products">Shop</a><span aria-hidden="true">›</span><span aria-current="page">{{ q() ? 'Search' : categoryName() }}</span> }
+    @else { <span aria-current="page">Shop</span> }
+  </nav>
+
+  <header class="head">
+    <div>
+      <h1 class="page-title">{{ heading() }}</h1>
+      @if (result() && !loading()) { <p class="count">{{ result()!.totalElements }} {{ result()!.totalElements === 1 ? 'product' : 'products' }}</p> }
+    </div>
+    <div class="head-tools">
+      <button type="button" class="btn btn-sm filter-btn" (click)="toggleFilters(true)" aria-controls="filters">
+        Filters@if (chips().length) { <span class="dot">{{ chips().length }}</span> }
+      </button>
+      <label class="sort"><span class="sr-only">Sort by</span>
+        <select class="select" [ngModel]="sort()" (ngModelChange)="set({ sort: $event })" aria-label="Sort by">
+          @for (o of sortOptions; track o.value) { <option [value]="o.value">{{ o.label }}</option> }
+        </select>
+      </label>
+    </div>
+  </header>
+
+  <div class="pills" role="list" aria-label="Categories">
+    <button type="button" role="listitem" class="pill" [class.on]="!category()" (click)="set({ category: null })">All</button>
+    @for (c of flatCategories(); track c.slug) {
+      @if (c.depth === 0) { <button type="button" role="listitem" class="pill" [class.on]="category() === c.slug" (click)="set({ category: c.slug })">{{ c.name }}</button> }
+    }
+  </div>
+
+  @if (chips().length) {
+    <div class="chips" aria-label="Active filters">
+      @for (c of chips(); track c.label) {
+        <button type="button" class="chip" (click)="c.remove()" [attr.aria-label]="'Remove filter ' + c.label">{{ c.label }} <span aria-hidden="true">×</span></button>
+      }
+      <button type="button" class="link-btn clear" (click)="clearAll()">Clear all</button>
+    </div>
+  }
+
+  <div class="layout">
+    @if (filtersOpen()) { <div class="scrim" (click)="toggleFilters(false)" aria-hidden="true"></div> }
+    <aside id="filters" class="filters" [class.open]="filtersOpen()" aria-label="Filters">
+      <div class="f-head">
+        <h2>Filters</h2>
+        <button type="button" class="icon-btn close" (click)="toggleFilters(false)" aria-label="Close filters">×</button>
+      </div>
+
+      <details class="f-sec cats" open>
+        <summary>Category</summary>
+        <ul class="f-list">
+          <li><button type="button" class="f-link" [class.on]="!category()" (click)="set({ category: null })">All products</button></li>
+          @for (c of flatCategories(); track c.slug) {
+            <li [style.padding-left.px]="c.depth * 14"><button type="button" class="f-link" [class.on]="category() === c.slug" (click)="set({ category: c.slug })">{{ c.name }}</button></li>
+          }
+        </ul>
+      </details>
+
+      <details class="f-sec" open>
+        <summary>Price</summary>
+        <form class="price" (ngSubmit)="applyPrice()">
+          <label><span class="sr-only">Minimum price</span><input class="input" type="number" min="0" inputmode="numeric" placeholder="Min" [(ngModel)]="minPrice" name="min" /></label>
+          <span aria-hidden="true">–</span>
+          <label><span class="sr-only">Maximum price</span><input class="input" type="number" min="0" inputmode="numeric" placeholder="Max" [(ngModel)]="maxPrice" name="max" /></label>
+          <button type="submit" class="btn btn-sm btn-primary">Go</button>
+        </form>
+        @if (filters()?.priceRange; as r) { @if (r.max > 0) { <p class="hint">Products range from {{ r.min }} to {{ r.max }}.</p> } }
+      </details>
+
+      <details class="f-sec" open>
+        <summary>Availability</summary>
+        <label class="switch"><input type="checkbox" [ngModel]="inStock()" (ngModelChange)="set({ inStock: $event ? 'true' : null })" name="stock" /><span class="track" aria-hidden="true"></span> In stock only</label>
+      </details>
+
+      @for (a of filters()?.attributes ?? []; track a.code) {
+        <details class="f-sec" open>
+          <summary>{{ a.label }}</summary>
+          <ul class="f-list">
+            @for (v of a.values; track v.valueCode) {
+              <li><label class="opt"><input type="checkbox" [checked]="hasAttr(a.code, v.valueCode)" (change)="toggleAttr(a.code, v.valueCode)" /><span class="box" aria-hidden="true"></span>{{ v.displayLabel }}</label></li>
+            }
+          </ul>
+        </details>
+      }
+
+      <div class="f-foot">
+        <button type="button" class="btn btn-block btn-primary" (click)="toggleFilters(false)">Show {{ result()?.totalElements ?? '' }} results</button>
+        <button type="button" class="btn btn-block" (click)="clearAll()" [disabled]="!chips().length">Clear all</button>
+      </div>
+    </aside>
+
+    <section class="results" aria-live="polite" [attr.aria-busy]="loading()">
+      @if (loading()) {
+        <div class="grid-products" aria-hidden="true">
+          @for (i of skeletons; track i) { <div class="sk"><div class="sk-img"></div><div class="sk-line"></div><div class="sk-line short"></div></div> }
+        </div>
+        <span class="sr-only" role="status">Loading products…</span>
+      }
+      @else if (error()) { <app-empty-state kind="error" title="We couldn't load products" [message]="error()!" actionLabel="Try again" (action)="reload()" /> }
+      @else if (!result() || result()!.content.length === 0) {
+        <app-empty-state title="No products found" message="Nothing matches these filters. Try removing one, or browse everything.">
+          @if (chips().length) { <button type="button" class="btn" (click)="clearAll()">Clear all filters</button> }
+        </app-empty-state>
+      }
+      @else {
+        <div class="grid-products">
+          @for (p of result()!.content; track p.productId) {
+            <app-product-card [product]="p" [wished]="wishlist.has(p.productId)" (wishlistToggle)="toggleWish($event)"
+              [showAddToCart]="true" [adding]="addingId() === p.productId" (addToCart)="quickAdd($event)" />
+          }
+        </div>
+        @if (result()!.totalPages > 1) {
+          <nav class="pager2" aria-label="Pagination">
+            <button class="pg" type="button" [disabled]="page() === 0" (click)="set({ page: page() - 1 })" aria-label="Previous page">‹</button>
+            @for (n of pageList(); track $index) {
+              @if (n === '…') { <span class="gap" aria-hidden="true">…</span> }
+              @else { <button class="pg" type="button" [class.on]="n === page()" [attr.aria-current]="n === page() ? 'page' : null" (click)="set({ page: n })">{{ n + 1 }}</button> }
+            }
+            <button class="pg" type="button" [disabled]="page() + 1 >= result()!.totalPages" (click)="set({ page: page() + 1 })" aria-label="Next page">›</button>
+          </nav>
+        }
+      }
+    </section>
+  </div>
+</div>

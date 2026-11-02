@@ -1,0 +1,37 @@
+<article class="card" [class.sold]="!product().inStock">
+  <a class="media" [routerLink]="['/products', product().slug]" [attr.aria-label]="'View ' + product().title">
+    @if (product().primaryImage; as img) {
+      <img [src]="img.thumbUrl || img.url" [alt]="img.alt || product().title" loading="lazy" />
+    } @else {
+      <div class="placeholder" aria-hidden="true">◇</div>
+    }
+    <span class="badges">
+      @if (!product().inStock) { <span class="badge">Sold out</span> }
+      @else if (onSale) { <span class="badge sale">Sale</span> }
+    </span>
+  </a>
+  @if (showWishlist()) {
+    <button type="button" class="wish" (click)="wishlistToggle.emit(product())"
+            [attr.aria-pressed]="wished()" [attr.aria-label]="wished() ? 'Remove from wishlist' : 'Add to wishlist'"
+            [appTooltip]="wished() ? 'Remove from wishlist' : 'Add to wishlist'">
+      {{ wished() ? '♥' : '♡' }}
+    </button>
+  }
+  <div class="info">
+    @if (product().categoryName) {
+      <p class="cat">{{ product().categoryName }}</p>
+    }
+    <h3 class="title"><a [routerLink]="['/products', product().slug]">{{ product().title }}</a></h3>
+    <p class="price">
+      <span class="now">{{ product().effectivePrice | money: product().currency }}</span>
+      @if (onSale) {
+        <s class="was">{{ product().price | money: product().currency }}</s>
+        <span class="off">{{ discountPercent }}% off</span>
+      }
+    </p>
+    @if (showAddToCart() && product().inStock) {
+      <button type="button" class="quick-add" [disabled]="adding()" (click)="addToCart.emit(product())"
+              [attr.aria-label]="'Add ' + product().title + ' to cart'">{{ adding() ? 'Adding…' : 'Add to cart' }}</button>
+    }
+  </div>
+</article>

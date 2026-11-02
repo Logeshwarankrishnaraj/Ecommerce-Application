@@ -1,0 +1,54 @@
+<p><a routerLink="/admin/orders">← Orders</a></p>
+<admin-state [loading]="loading()" [error]="error()" (retry)="load(id())">
+  @if (o(); as o) {
+    <div class="page-head"><h1>Order {{ o.orderNumber }}</h1><span class="badge">{{ label(o.status) }}</span></div>
+    <div class="grid cols-2">
+      <section class="card"><h2>Customer</h2><p>{{ o.customer.name }}<br />{{ o.customer.email }}<br />{{ o.customer.phone }}</p>
+        <h2>Ship to</h2><p>{{ o.shippingAddress.recipientName }}<br />{{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) {, {{ o.shippingAddress.line2 }}}<br />
+          {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} {{ o.shippingAddress.postalCode }}<br />{{ o.shippingAddress.country }}</p>
+        <p class="hint">{{ o.paymentMethod }} · payment {{ label(o.paymentStatus) }} · placed {{ o.createdAt | date: 'medium' }}</p></section>
+      <section class="card"><h2>Status</h2>
+        @if (o.allowedTransitions.length === 0) { <p class="hint">This order is in a final state.</p> }
+        @else {
+          <div class="field"><label for="sn">Note (optional)</label><input id="sn" type="text" [(ngModel)]="note" maxlength="300" /></div>
+          <div class="row-actions">
+            @for (t of o.allowedTransitions; track t) {
+              <button class="btn" type="button" [class.danger]="t === 'CANCELLED'" [class.primary]="t !== 'CANCELLED'" [disabled]="busy()" (click)="transition(o, t)">{{ t === 'CANCELLED' ? 'Cancel order' : 'Mark ' + label(t).toLowerCase() }}</button>
+            }
+          </div>
+        }
+        <h2 style="margin-top:16px">History</h2>
+        <ol>@for (h of o.statusHistory; track $index) { <li>{{ label(h.status) }} <span class="hint">{{ h.at | date: 'short' }}</span></li> }</ol>
+      </section>
+    </div>
+    <section class="card"><h2>Items</h2>
+      <div class="table-wrap"><table class="tbl"><thead><tr><th>SKU</th><th>Title</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Line</th></tr></thead><tbody>
+        @for (i of o.items; track i.orderItemId) { <tr><td>{{ i.sku }}</td><td>{{ i.title }}</td><td class="num">{{ i.quantity }}</td><td class="num">{{ i.unitPrice.toFixed(2) }}</td><td class="num">{{ i.lineTotal.toFixed(2) }}</td></tr> }
+        <tr><td colspan="4">Subtotal / shipping / tax</td><td class="num">{{ o.subtotal.toFixed(2) }} / {{ o.shippingAmount.toFixed(2) }} / {{ o.taxAmount.toFixed(2) }}</td></tr>
+        <tr><td colspan="4"><strong>Total ({{ o.currency }})</strong></td><td class="num"><strong>{{ o.total.toFixed(2) }}</strong></td></tr>
+      </tbody></table></div></section>
+    <section class="card"><h2>Shipments</h2>
+      @for (s of o.shipments; track s.shipmentId) {
+        <div class="grid cols-3" style="margin-bottom:8px">
+          <div class="field"><label [for]="'c' + s.shipmentId">Carrier</label><input [id]="'c' + s.shipmentId" type="text" [value]="s.carrier ?? ''" (change)="edit(s, 'carrier', $event)" /></div>
+          <div class="field"><label [for]="'t' + s.shipmentId">Tracking number</label><input [id]="'t' + s.shipmentId" type="text" [value]="s.trackingNumber ?? ''" (change)="edit(s, 'trackingNumber', $event)" /></div>
+          <div class="field"><label [for]="'st' + s.shipmentId">Status</label><select [id]="'st' + s.shipmentId" (change)="setStatus(s, $event)">
+            @for (x of shipmentStatuses; track x) { <option [value]="x" [selected]="x === s.status">{{ label(x) }}</option> }</select></div>
+        </div>
+      }
+      @if (['CONFIRMED','PACKING','SHIPPED'].includes(o.status)) {
+        <h3>Add shipment</h3>
+        <div class="grid cols-3">
+          <div class="field"><label for="nc">Carrier</label><input id="nc" type="text" [(ngModel)]="ns.carrier" maxlength="80" /></div>
+          <div class="field"><label for="nt">Tracking number</label><input id="nt" type="text" [(ngModel)]="ns.trackingNumber" maxlength="80" /></div>
+          <div class="field"><label for="nn">Note</label><input id="nn" type="text" [(ngModel)]="ns.trackingNote" maxlength="500" /></div>
+        </div>
+        <button class="btn primary" type="button" [disabled]="busy()" (click)="addShipment()">Add shipment</button>
+        <p class="hint">Marking a shipment shipped moves the order to Shipped; delivering every shipment completes the order.</p>
+      } @else if (o.shipments.length === 0) { <p class="hint">Shipments can be added once the order is confirmed.</p> }
+    </section>
+    <section class="card"><h2>Packing notes (internal)</h2>
+      <div class="field"><textarea rows="3" [(ngModel)]="notes" maxlength="1000" aria-label="Packing notes"></textarea></div>
+      <button class="btn" type="button" [disabled]="busy()" (click)="saveNotes()">Save notes</button></section>
+  }
+</admin-state>

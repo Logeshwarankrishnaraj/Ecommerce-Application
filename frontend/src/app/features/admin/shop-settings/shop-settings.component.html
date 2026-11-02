@@ -1,0 +1,34 @@
+<div class="page-head"><h1>Shop profile & settings</h1></div>
+<admin-state [loading]="loading()" [error]="error()" (retry)="load()">
+  @if (profile(); as p) {
+    <form class="card" (ngSubmit)="saveProfile()">
+      <h2>Business profile</h2>
+      <div class="grid cols-2">
+        @for (f of profileFields; track f.key) {
+          <div class="field"><label [for]="'p-' + f.key">{{ f.label }}</label><input [id]="'p-' + f.key" [name]="f.key" [type]="f.type ?? 'text'" [(ngModel)]="profileValues[f.key]" /></div>
+        }
+      </div>
+      <p class="hint">The business address is recorded on each shipment as the ship-from address.</p>
+      <button class="btn primary" type="submit" [disabled]="busy()">Save profile</button>
+    </form>
+    <form class="card" (ngSubmit)="saveSettings()">
+      <h2>Store settings</h2>
+      @for (g of groups(); track g) {
+        <h3>{{ g }}</h3>
+        <div class="grid cols-2">
+          @for (s of byGroup(g); track s.key) {
+            <div class="field"><label [for]="'s-' + s.key">{{ s.description || s.key }}</label>
+              @switch (s.type) {
+                @case ('COLOR') { <div class="row-actions"><input [id]="'s-' + s.key" type="color" [name]="s.key" [(ngModel)]="values[s.key]" /><input type="text" [name]="s.key + '-t'" [(ngModel)]="values[s.key]" maxlength="7" [attr.aria-label]="s.key + ' hex'" /></div> }
+                @case ('ENUM') { <select [id]="'s-' + s.key" [name]="s.key" [(ngModel)]="values[s.key]">@for (o of s.options ?? []; track o) { <option [value]="o">{{ o }}</option> }</select> }
+                @case ('BOOLEAN') { <select [id]="'s-' + s.key" [name]="s.key" [(ngModel)]="values[s.key]"><option value="true">Enabled</option><option value="false">Disabled</option></select> }
+                @default { <input [id]="'s-' + s.key" [name]="s.key" type="text" [(ngModel)]="values[s.key]" /> }
+              }
+              <span class="hint">{{ s.key }}</span></div>
+          }
+        </div>
+      }
+      <button class="btn primary" type="submit" [disabled]="busy()">Save settings</button>
+    </form>
+  }
+</admin-state>

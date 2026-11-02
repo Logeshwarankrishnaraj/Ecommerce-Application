@@ -1,0 +1,71 @@
+@switch (block().type) {
+  @case ('HERO') {
+    <section class="hero" [style.background-image]="block().imageUrl ? 'linear-gradient(var(--c-wash), var(--c-wash)), url(' + block().imageUrl + ')' : null">
+      <div class="container hero-inner">
+        @if (block().subtitle) {<p class="eyebrow">{{ block().subtitle }}</p>}
+        <h1>{{ block().title }}</h1>
+        @if (block().body) {<p class="lead">{{ block().body }}</p>}
+        @if (block().linkUrl && block().ctaLabel) {
+          @if (isExternal(block().linkUrl)) {
+            <a class="btn btn-primary" [href]="block().linkUrl" rel="noopener noreferrer">{{ block().ctaLabel }}</a>
+          } @else {
+            <a class="btn btn-primary" [routerLink]="block().linkUrl">{{ block().ctaLabel }}</a>
+          }
+        }
+      </div>
+    </section>
+  }
+  @case ('CATEGORY_TILES') {
+    <section class="container section">
+      @if (block().title) {<h2 class="section-title">{{ block().title }}</h2>}
+      <ul class="tiles">
+        @for (c of block().categories ?? []; track c.categoryId) {
+          <li>
+            <a [routerLink]="['/products']" [queryParams]="{ category: c.slug }" class="tile">
+              <span>{{ c.name }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  @case ('FEATURED_PRODUCTS') {
+    <section class="container section">
+      @if (block().title) {<h2 class="section-title">{{ block().title }}</h2>}
+      @if (block().subtitle) {<p class="muted center">{{ block().subtitle }}</p>}
+      <div class="grid-products">
+        @for (p of block().products ?? []; track p.productId) {
+          <app-product-card [product]="p" [wished]="wishlist.ids().has(p.productId)" (wishlistToggle)="toggleWish($event)" />
+        }
+      </div>
+      @if (block().linkUrl && block().ctaLabel) {
+        <p class="center"><a class="btn" [routerLink]="block().linkUrl">{{ block().ctaLabel }}</a></p>
+      }
+    </section>
+  }
+  @case ('PROMO_STRIP') {
+    <section class="promo">
+      <div class="container">
+        <span>{{ block().title }}</span>
+        @if (block().linkUrl && block().ctaLabel) {
+          <a [routerLink]="block().linkUrl">{{ block().ctaLabel }}</a>
+        }
+      </div>
+    </section>
+  }
+  @case ('TEXT_IMAGE') {
+    <section class="container section text-image">
+      @if (block().imageUrl) {
+        <img [src]="block().imageUrl" [alt]="block().title || ''" loading="lazy" />
+      }
+      <div>
+        @if (block().title) {<h2 class="section-title left">{{ block().title }}</h2>}
+        @if (block().subtitle) {<p class="eyebrow">{{ block().subtitle }}</p>}
+        @if (block().body) {<p class="body">{{ block().body }}</p>}
+        @if (block().linkUrl && block().ctaLabel) {
+          <a class="btn" [routerLink]="block().linkUrl">{{ block().ctaLabel }}</a>
+        }
+      </div>
+    </section>
+  }
+}

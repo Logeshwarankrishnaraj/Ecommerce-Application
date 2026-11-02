@@ -1,0 +1,23 @@
+<div class="page-head"><h1>Users</h1></div>
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="uq">Search</label><input id="uq" name="q" type="search" [(ngModel)]="q" placeholder="Name, username or email" /></div>
+  <div class="field"><label for="ur">Role</label><select id="ur" name="role" [(ngModel)]="role"><option value="">All</option><option value="ROLE_CUSTOMER">Customer</option><option value="ROLE_ADMIN">Admin</option><option value="ROLE_SUPER_ADMIN">Super admin</option></select></div>
+  <div class="field"><label for="us">Status</label><select id="us" name="status" [(ngModel)]="status"><option value="">All</option><option value="ACTIVE">Active</option><option value="DISABLED">Disabled</option></select></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No users match." (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Roles</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody>@for (u of rows(); track u.userId) {
+        <tr><td>{{ u.fullName }}</td><td>{{ u.username }}</td><td>{{ u.email }}</td><td>{{ roleText(u) }}</td>
+          <td><span class="badge" [class.ok]="u.status === 'ACTIVE'" [class.bad]="u.status !== 'ACTIVE'">{{ u.status }}</span></td><td>{{ u.createdAt | date: 'mediumDate' }}</td>
+          <td><div class="row-actions">
+            @if (u.userId !== auth.user()?.userId && !u.roles.includes('ROLE_SUPER_ADMIN')) {
+              <button class="btn sm" type="button" (click)="toggleStatus(u)">{{ u.status === 'ACTIVE' ? 'Disable' : 'Enable' }}</button>
+              @if (auth.isSuperAdmin()) { <button class="btn sm" type="button" (click)="toggleAdmin(u)">{{ u.roles.includes('ROLE_ADMIN') ? 'Remove admin' : 'Make admin' }}</button> }
+            }</div></td></tr>
+      }</tbody></table></div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

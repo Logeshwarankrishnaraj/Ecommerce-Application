@@ -1,0 +1,22 @@
+<div class="page-head"><h1>Error center</h1></div>
+<p class="hint">Unexpected server errors, sanitized (no personal data or secrets). Repeats of the same error are grouped. Quote the reference ID when investigating logs.</p>
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="es">State</label><select id="es" name="status" [(ngModel)]="status"><option value="">All</option><option value="OPEN">Open</option><option value="ACKNOWLEDGED">Acknowledged</option></select></div>
+  <div class="field"><label for="ev">Severity</label><select id="ev" name="sev" [(ngModel)]="severity"><option value="">All</option><option value="ERROR">Error</option><option value="CRITICAL">Critical</option></select></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No errors recorded. 🎉" (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Last seen</th><th>Severity</th><th>Where</th><th>Summary</th><th class="num">Count</th><th>Alert</th><th>State</th><th>Ref</th><th></th></tr></thead>
+      <tbody>@for (r of rows(); track r.eventId) {
+        <tr><td>{{ r.lastOccurredAt | date: 'short' }}</td><td><span class="badge" [class.bad]="r.severity !== 'WARN'">{{ r.severity }}</span></td>
+          <td>{{ r.operation }}<br /><span class="hint">{{ r.route }}</span></td><td><strong>{{ r.errorType }}</strong><br />{{ r.summary }}</td>
+          <td class="num">{{ r.occurrenceCount }}</td><td>{{ r.notificationState }}</td>
+          <td><span class="badge" [class.warn]="r.remediationState === 'OPEN'" [class.ok]="r.remediationState !== 'OPEN'">{{ r.remediationState }}</span></td>
+          <td><code>{{ r.correlationId }}</code></td>
+          <td>@if (r.remediationState === 'OPEN') { <button class="btn sm" type="button" (click)="ack(r)">Acknowledge</button> }</td></tr>
+      }</tbody></table></div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

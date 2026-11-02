@@ -1,0 +1,112 @@
+<a class="skip" href="#main">Skip to content</a>
+<header class="header">
+  <div class="container top">
+    <button type="button" class="icon-btn menu-toggle" (click)="menuOpen.set(!menuOpen())"
+            [attr.aria-expanded]="menuOpen()" aria-controls="primary-nav" appTooltip="Menu"><app-icon [name]="menuOpen() ? 'x' : 'menu'" /></button>
+
+    <a routerLink="/" class="brand" (click)="closeMenus()">
+      @if (site.config().shop.logoUrl; as logo) {
+        <img [src]="logo" [alt]="site.config().shop.displayName" class="logo" />
+      } @else {
+        <span class="brand-text">{{ site.config().shop.displayName }}</span>
+      }
+    </a>
+
+    <form class="search" [formGroup]="searchForm" (ngSubmit)="search()" role="search">
+      <label class="sr-only" for="site-search">Search products</label>
+      <app-icon name="search" [size]="18" class="s-ico" />
+      <input id="site-search" type="search" formControlName="q" placeholder="Search rings, necklaces, earrings…" maxlength="100" autocomplete="off" />
+    </form>
+
+    <div class="actions">
+      <app-theme-toggle />
+      <a routerLink="/wishlist" class="icon-btn" appTooltip="Wishlist" aria-label="Wishlist">
+        <app-icon name="heart" />@if (wishlist.count() > 0) {<span class="count">{{ wishlist.count() }}</span>}
+      </a>
+      <a routerLink="/cart" class="icon-btn" appTooltip="Cart" aria-label="Cart">
+        <app-icon name="bag" />@if (cart.count() > 0) {<span class="count">{{ cart.count() }}</span>}
+      </a>
+      @if (auth.isCustomer() && auth.user(); as u) {
+        <div class="account">
+          <button type="button" class="icon-btn" (click)="accountOpen.set(!accountOpen())"
+                  [attr.aria-expanded]="accountOpen()" aria-haspopup="true" appTooltip="Account" aria-label="Account menu"><app-icon name="user" /></button>
+          @if (accountOpen()) {
+            <div class="menu" role="menu">
+              <p class="hello">Signed in as<br /><strong>{{ u.fullName }}</strong></p>
+              <a role="menuitem" routerLink="/account/profile" (click)="closeMenus()"><app-icon name="user" [size]="16" /> Profile</a>
+              <a role="menuitem" routerLink="/account/orders" (click)="closeMenus()"><app-icon name="receipt" [size]="16" /> Orders</a>
+              <a role="menuitem" routerLink="/account/addresses" (click)="closeMenus()"><app-icon name="store" [size]="16" /> Addresses</a>
+              <button type="button" role="menuitem" class="out" (click)="logout()"><app-icon name="logout" [size]="16" /> Sign out</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/login" class="btn btn-sm signin" aria-label="Sign in"><app-icon name="user" [size]="18" class="si" /><span class="st">Sign in</span></a>
+      }
+    </div>
+  </div>
+
+  <nav id="primary-nav" class="nav" [class.open]="menuOpen()" aria-label="Primary">
+    <div class="container nav-in">
+      @for (c of categories(); track c.categoryId) {
+        <a [routerLink]="['/products']" [queryParams]="{ category: c.slug }" (click)="closeMenus()">{{ c.name }}</a>
+      }
+      @for (l of site.config().headerLinks; track l.url + l.label) {
+        @if (isExternal(l.url)) {
+          <a [href]="l.url" rel="noopener noreferrer" target="_blank">{{ l.label }}</a>
+        } @else {
+          <a [routerLink]="l.url" routerLinkActive="active" (click)="closeMenus()">{{ l.label }}</a>
+        }
+      }
+    </div>
+  </nav>
+</header>
+@if (menuOpen()) { <div class="scrim" (click)="closeMenus()" aria-hidden="true"></div> }
+
+<main id="main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="container foot-grid">
+    <div class="foot-brand">
+      <p class="brand-text">{{ site.config().shop.displayName }}</p>
+      @if (site.config().shop.tagline) { <p class="muted">{{ site.config().shop.tagline }}</p> }
+      <ul class="trust" aria-label="Our promises">
+        <li><app-icon name="truck" [size]="18" /> Insured delivery</li>
+        <li><app-icon name="shield" [size]="18" /> Secure checkout</li>
+        <li><app-icon name="refresh" [size]="18" /> Easy returns</li>
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Shop</p>
+      <ul class="links">
+        <li><a routerLink="/products">Shop</a></li>
+        @for (c of categories(); track c.categoryId) { <li><a [routerLink]="['/products']" [queryParams]="{ category: c.slug }">{{ c.name }}</a></li> }
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Information</p>
+      <ul class="links">
+        @for (l of site.config().footerLinks; track l.url + l.label) {
+          <li>
+            @if (isExternal(l.url)) { <a [href]="l.url" rel="noopener noreferrer" target="_blank">{{ l.label }}</a> }
+            @else { <a [routerLink]="l.url">{{ l.label }}</a> }
+          </li>
+        }
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Contact</p>
+      <ul class="links">
+        @if (site.config().shop.address) { <li class="muted">{{ site.config().shop.address }}</li> }
+        @if (site.config().shop.supportEmail; as em) { <li><a [href]="'mailto:' + em">{{ em }}</a></li> }
+        @if (site.config().shop.supportPhone; as ph) { <li class="muted">{{ ph }}</li> }
+      </ul>
+    </div>
+  </div>
+  <div class="container foot-bar">
+    <span>© {{ year }} {{ site.config().shop.displayName }}. All rights reserved.</span>
+    @if (site.loadFailed()) { <span role="status">Store settings could not be loaded; showing defaults.</span> }
+  </div>
+</footer>

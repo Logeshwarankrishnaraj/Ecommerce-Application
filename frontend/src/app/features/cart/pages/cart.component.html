@@ -1,0 +1,42 @@
+<div class="container page">
+  <div class="page-head"><h1 class="page-title">Your cart</h1>
+    @if (cartSvc.cart().items.length > 0) { <a routerLink="/products" class="link-btn"><app-icon name="arrow-left" [size]="16" /> Continue shopping</a> }
+  </div>
+  @if (cartSvc.loading() && cartSvc.cart().items.length === 0) { <app-loading-state /> }
+  @else if (cartSvc.cart().items.length === 0) {
+    <app-empty-state title="Your cart is empty" message="Find something you love." />
+    <p class="center"><a class="btn btn-primary" routerLink="/products">Continue shopping</a></p>
+  } @else {
+    @if (cartSvc.cart().hasIssues) { <p class="alert alert-warn" role="status">Some items need your attention before checkout.</p> }
+    <div class="layout">
+      <ul class="lines">
+        @for (i of cartSvc.cart().items; track i.cartItemId) {
+          <li class="card line">
+            @if (i.imageUrl) { <img [src]="i.imageUrl" [alt]="i.title" class="thumb" loading="lazy" decoding="async" width="96" height="96" /> } @else { <div class="thumb ph" aria-hidden="true"><app-icon name="gem" [size]="28" /></div> }
+            <div class="info">
+              <a class="name" [routerLink]="['/products', i.slug]">{{ i.title }}</a>
+              <p class="muted small">SKU {{ i.sku }} · {{ i.unitPrice | money: cartSvc.cart().currency }} each</p>
+              @if (i.issue) { <p class="small bad" role="alert">{{ i.issue }}</p> }
+            </div>
+            <div class="qty" role="group" [attr.aria-label]="'Quantity for ' + i.title">
+              <button type="button" aria-label="Decrease quantity" [disabled]="i.quantity <= 1" (click)="step(i.cartItemId, i.quantity, -1, i.availableQuantity)"><app-icon name="minus" [size]="16" /></button>
+              <input [id]="'q' + i.cartItemId" type="number" inputmode="numeric" min="1" [max]="i.availableQuantity || 1" [value]="i.quantity" (change)="setQty(i.cartItemId, $event)" [attr.aria-label]="'Quantity for ' + i.title" />
+              <button type="button" aria-label="Increase quantity" [disabled]="i.quantity >= (i.availableQuantity || 1)" (click)="step(i.cartItemId, i.quantity, 1, i.availableQuantity)"><app-icon name="plus" [size]="16" /></button>
+            </div>
+            <strong class="total">{{ i.lineTotal | money: cartSvc.cart().currency }}</strong>
+            <button type="button" class="icon-btn rm" (click)="remove(i.cartItemId)" [attr.aria-label]="'Remove ' + i.title" title="Remove"><app-icon name="trash" [size]="18" /></button>
+          </li>
+        }
+      </ul>
+      <aside class="card summary">
+        <h2>Order summary</h2>
+        <p class="row spread"><span>Subtotal</span><strong>{{ cartSvc.cart().subtotal | money: cartSvc.cart().currency }}</strong></p>
+        <p class="muted small">Shipping and taxes are calculated at checkout.</p>
+        @if (!auth.isCustomer()) { <p class="muted small">You will be asked to sign in or create an account at checkout. Your cart is kept.</p> }
+        <a class="btn btn-primary btn-lg btn-block" routerLink="/checkout" [class.disabled]="cartSvc.cart().hasIssues"
+           [attr.aria-disabled]="cartSvc.cart().hasIssues">Checkout</a>
+        <p class="secure small muted"><app-icon name="shield" [size]="16" /> Secure checkout</p>
+      </aside>
+    </div>
+  }
+</div>

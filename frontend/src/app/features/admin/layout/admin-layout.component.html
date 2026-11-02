@@ -1,0 +1,26 @@
+<div class="admin-shell">
+  <header class="admin-top">
+    <button type="button" class="icon-btn admin-burger" adminTooltip="Toggle navigation menu" aria-label="Toggle navigation menu"
+            [attr.aria-expanded]="navOpen()" aria-controls="admin-nav" (click)="toggleNav()"><app-icon [name]="navOpen() ? 'x' : 'menu'" /></button>
+    <strong class="admin-brand"><app-icon name="gem" [size]="20" /> Admin</strong>
+    <span class="admin-spacer"></span>
+    <a class="admin-link" href="/" adminTooltip="Open the customer storefront"><app-icon name="external" [size]="16" /><span class="lt">View store</span></a>
+    <app-theme-toggle />
+    <span class="admin-user"><span class="nm">{{ auth.user()?.fullName }}</span>
+      @if (auth.isSuperAdmin()) { <em>Super admin</em> }</span>
+    <button type="button" class="btn btn-sm" (click)="logout()"><app-icon name="logout" [size]="16" /> Log out</button>
+  </header>
+  <div class="admin-body">
+    <nav id="admin-nav" class="admin-nav" [class.open]="navOpen()" aria-label="Admin navigation">
+      @for (item of nav; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!item.exact }"
+           (click)="closeNav()"><app-icon [name]="item.icon" [size]="18" />{{ item.label }}</a>
+      }
+    </nav>
+    <div class="admin-scrim" [class.open]="navOpen()" (click)="closeNav()" aria-hidden="true"></div>
+    <main class="admin-main" id="admin-main">
+      <router-outlet />
+    </main>
+  </div>
+  <admin-confirm-dialog />
+</div>

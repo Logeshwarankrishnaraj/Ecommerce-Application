@@ -1,0 +1,124 @@
+<div class="page-head">
+  <h1>{{ isNew() ? 'New product' : 'Edit product' }}</h1>
+  <a class="btn" routerLink="/admin/products">← Back to products</a>
+</div>
+<admin-state [loading]="loading()" [error]="loadError()" (retry)="load()">
+  @if (product(); as p) {
+    <div class="card status-bar">
+      <span class="badge" [class]="statusClass(p.status)">{{ p.status }}</span>
+      <span class="hint">On hand {{ p.onHand }} · reserved {{ p.reserved }} · available {{ p.available }} · updated {{ p.updatedAt | date: 'short' }}</span>
+      <span class="spacer"></span>
+      @if (p.status !== 'PUBLISHED') { <button type="button" class="btn sm" (click)="lifecycle('publish')">Publish</button> }
+      @else { <button type="button" class="btn sm" (click)="lifecycle('unpublish')">Unpublish</button> }
+      @if (p.status !== 'ARCHIVED') { <button type="button" class="btn sm danger" (click)="lifecycle('archive')">Archive</button> }
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <section class="card">
+      <h2>Details</h2>
+      <div class="grid cols-2">
+        <div class="field" [class.invalid]="msg('sku','SKU')"><label for="sku">SKU *</label>
+          <input id="sku" type="text" formControlName="sku" /><span class="err-text">{{ msg('sku','SKU') }}</span></div>
+        <div class="field" [class.invalid]="msg('title','Title')"><label for="title">Title *</label>
+          <input id="title" type="text" formControlName="title" /><span class="err-text">{{ msg('title','Title') }}</span></div>
+        <div class="field" [class.invalid]="msg('slug','Slug')"><label for="slug">Slug</label>
+          <input id="slug" type="text" formControlName="slug" placeholder="auto-generated from title" />
+          <span class="hint">Lowercase letters, digits and dashes.</span><span class="err-text">{{ msg('slug','Slug') }}</span></div>
+        <div class="field" [class.invalid]="msg('categoryId','Category')"><label for="cat">Category *</label>
+          <select id="cat" formControlName="categoryId">
+            <option [ngValue]="null">Select…</option>
+            @for (c of categories(); track c.categoryId) { <option [ngValue]="c.categoryId">{{ c.name }}{{ c.active ? '' : ' (inactive)' }}</option> }
+          </select><span class="err-text">{{ msg('categoryId','Category') }}</span></div>
+      </div>
+      <div class="field"><label for="desc">Description</label><textarea id="desc" rows="5" formControlName="description"></textarea></div>
+    </section>
+
+    <section class="card">
+      <h2>Pricing &amp; stock</h2>
+      <div class="grid cols-3">
+        <div class="field" [class.invalid]="msg('basePrice','Base price')"><label for="bp">Base price *</label>
+          <input id="bp" type="number" step="0.01" min="0" formControlName="basePrice" /><span class="err-text">{{ msg('basePrice','Base price') }}</span></div>
+        <div class="field" [class.invalid]="msg('salePrice','Sale price')"><label for="sp">Sale price</label>
+          <input id="sp" type="number" step="0.01" min="0" formControlName="salePrice" /><span class="err-text">{{ msg('salePrice','Sale price') }}</span></div>
+        <div class="field"><label for="cur">Currency</label><input id="cur" type="text" maxlength="3" formControlName="currency" /></div>
+        <div class="field" [class.invalid]="msg('lowStockThreshold','Threshold')"><label for="lst">Low-stock threshold</label>
+          <input id="lst" type="number" min="0" formControlName="lowStockThreshold" /><span class="err-text">{{ msg('lowStockThreshold','Threshold') }}</span></div>
+        <div class="field"><label class="lbl"><input type="checkbox" formControlName="featured" /> Featured product</label>
+          <span class="hint">Eligible for homepage blocks that use the Featured rule.</span></div>
+        @if (isNew()) {
+          <div class="field"><label for="is">Initial stock</label><input id="is" type="number" min="0" formControlName="initialStock" />
+            <span class="hint">Later changes go through Inventory adjustments.</span></div>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Attributes</h2>
+      @if (definitions().length === 0) { <p class="hint">No attribute definitions are configured.</p> }
+      <div class="grid cols-2">
+        @for (d of definitions(); track d.code) {
+          <div class="field">
+            <label [for]="'attr-' + d.code">{{ d.label }}</label>
+            @if (d.lovGroupCode) {
+              <select [id]="'attr-' + d.code" [value]="attrValues()[d.code] ?? ''" (change)="setAttr(d.code, $any($event.target).value)">
+                <option value="">— none —</option>
+                @for (v of activeValues(d.lovGroupCode); track v.valueCode) { <option [value]="v.valueCode" [selected]="attrValues()[d.code] === v.valueCode">{{ v.displayLabel }}</option> }
+              </select>
+            } @else {
+              <input [id]="'attr-' + d.code" type="text" [value]="attrValues()[d.code] ?? ''" (input)="setAttr(d.code, $any($event.target).value)" />
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>SEO</h2>
+      <div class="field"><label for="st">SEO title</label><input id="st" type="text" formControlName="seoTitle" /></div>
+      <div class="field"><label for="sd">SEO description</label><textarea id="sd" rows="2" formControlName="seoDescription"></textarea></div>
+    </section>
+
+    <div class="actions">
+      <button type="submit" class="btn primary" [disabled]="saving()">{{ saving() ? 'Saving…' : (isNew() ? 'Create product' : 'Save changes') }}</button>
+    </div>
+  </form>
+
+  <section class="card" aria-labelledby="img-h">
+    <h2 id="img-h">Images ({{ images().length }}/{{ maxImages }})</h2>
+    @if (isNew()) {
+      <p class="hint">Save the product first, then add up to {{ maxImages }} images (JPEG or PNG).</p>
+    } @else {
+      <p class="hint">The first image is shown on product cards. Drag to reorder or use the arrows. Images are cropped to the store’s configured ratio.</p>
+      <ul class="gallery">
+        @for (img of images(); track img.imageId; let i = $index) {
+          <li draggable="true" (dragstart)="dragStart(i)" (dragover)="dragOver($event)" (drop)="drop(i)" [class.primary]="img.primary">
+            <img [src]="img.thumbUrl" [alt]="img.alt" />
+            <div class="meta">
+              @if (img.primary) { <span class="badge ok">Primary</span> }
+              <label class="sr-only" [for]="'alt-' + img.imageId">Alt text</label>
+              <input [id]="'alt-' + img.imageId" type="text" [value]="img.alt" (change)="saveAlt(img, $any($event.target).value)" />
+              <div class="row-actions">
+                <button type="button" class="btn sm" [disabled]="i === 0 || imageBusy()" (click)="move(i, -1)" adminTooltip="Move image earlier" aria-label="Move image earlier">↑</button>
+                <button type="button" class="btn sm" [disabled]="i === images().length - 1 || imageBusy()" (click)="move(i, 1)" adminTooltip="Move image later" aria-label="Move image later">↓</button>
+                <button type="button" class="btn sm" [disabled]="img.primary" (click)="makePrimary(img)" adminTooltip="Use as the primary image" aria-label="Use as the primary image"><app-icon name="star" [size]="16" [filled]="img.primary" /></button>
+                <button type="button" class="btn sm danger" (click)="deleteImage(img)" adminTooltip="Delete this image" aria-label="Delete image"><app-icon name="trash" [size]="16" /></button>
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+      @if (images().length < maxImages) {
+        <div class="upload">
+          <div class="field"><label for="imgfile">Image file (JPEG/PNG, max 5 MB)</label>
+            <input #fileInput id="imgfile" type="file" accept="image/jpeg,image/png" (change)="onFileChosen($event)" /></div>
+          <div class="field"><label for="imgalt">Alt text *</label>
+            <input id="imgalt" type="text" [(ngModel)]="pendingAlt" [ngModelOptions]="{ standalone: true }" /></div>
+          <button type="button" class="btn primary" [disabled]="!canUpload()" (click)="uploadImage(fileInput)">{{ imageBusy() ? 'Working…' : 'Upload image' }}</button>
+        </div>
+      } @else {
+        <p class="hint">Image limit reached. Delete an image to add another.</p>
+      }
+    }
+  </section>
+</admin-state>

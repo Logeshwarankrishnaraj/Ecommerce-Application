@@ -1,0 +1,17 @@
+@if (confirm.pending(); as p) {
+  <div class="backdrop" (click)="confirm.answer(false)" (keydown.escape)="confirm.answer(false)">
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cd-title" aria-describedby="cd-msg"
+         tabindex="-1" (click)="$event.stopPropagation()" (keydown.escape)="confirm.answer(false)">
+      <h2 id="cd-title">{{ p.title }}</h2>
+      @if (p.subject) {
+        <p class="subject">{{ p.subject }}</p>
+      }
+      <p id="cd-msg">{{ p.message }}</p>
+      <div class="actions">
+        <button type="button" class="btn" (click)="confirm.answer(false)">Cancel</button>
+        <button #okButton type="button" class="btn" [class.danger]="p.danger" [class.primary]="!p.danger"
+                (click)="confirm.answer(true)">{{ p.confirmLabel || 'Confirm' }}</button>
+      </div>
+    </div>
+  </div>
+}

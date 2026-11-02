@@ -1,0 +1,6 @@
+.backdrop { position: fixed; inset: 0; background: rgba(20, 18, 15, 0.45); display: grid; place-items: center; z-index: 100; padding: 16px; }
+.dialog { background: var(--c-surface); border: 1px solid var(--c-border); max-width: 420px; width: 100%; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.18); }
+h2 { margin: 0 0 8px; font-family: var(--font-heading); font-size: 1.5rem; }
+p { margin: 0 0 12px; color: var(--c-muted); }
+.subject { color: var(--c-text); font-weight: 600; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }

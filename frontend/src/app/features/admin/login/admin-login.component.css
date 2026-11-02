@@ -1,0 +1,4 @@
+.wrap { min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--c-bg); }
+.card { width: min(420px, 100%); }
+.eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--c-muted, #777); }
+h1 { margin: 0 0 16px; }

@@ -1,0 +1,21 @@
+<div class="gallery">
+  <div class="main">
+    @if (current(); as img) {
+      <img [src]="img.url" [alt]="img.alt || fallbackAlt()" fetchpriority="high" decoding="async" />
+    } @else {
+      <div class="placeholder" role="img" aria-label="No image available">◇</div>
+    }
+  </div>
+  @if (images().length > 1) {
+    <ul class="thumbs" aria-label="Product images">
+      @for (img of images(); track img.imageId; let i = $index) {
+        <li>
+          <button type="button" (click)="select(i)" [attr.aria-current]="isSelected(i)" [attr.aria-label]="'Show image ' + (i + 1)"
+                  [class.active]="isSelected(i)">
+            <img [src]="img.thumbUrl || img.url" [alt]="img.alt || fallbackAlt()" loading="lazy" />
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</div>

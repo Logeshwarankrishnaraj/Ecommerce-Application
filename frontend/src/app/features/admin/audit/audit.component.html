@@ -1,0 +1,34 @@
+<div class="page-head"><h1>Audit log</h1>
+  @if (auth.isSuperAdmin()) {
+    <div class="row-actions">
+      <button class="btn danger" type="button" [disabled]="selected().size === 0 || busy()" (click)="deleteSelected()"><app-icon name="trash" [size]="16" /> Delete selected ({{ selected().size }})</button>
+      <button class="btn danger" type="button" [disabled]="total() === 0 || busy()" (click)="deleteAll()">Delete all</button>
+    </div>
+  }
+</div>
+<p class="hint">A record of sensitive admin actions. Entries cannot be edited.
+  @if (auth.isSuperAdmin()) { Only super admins can delete entries, and every deletion is recorded as a new entry. } @else { Only super admins can delete entries. }</p>
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="aa">Action</label><input id="aa" name="action" type="text" [(ngModel)]="action" placeholder="e.g. ORDER_STATUS" /></div>
+  <div class="field"><label for="ac">Actor</label><input id="ac" name="actor" type="text" [(ngModel)]="actor" placeholder="username" /></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No audit entries match." (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr>
+        @if (auth.isSuperAdmin()) { <th class="sel"><input type="checkbox" [checked]="allOnPageSelected()" (change)="toggleAll()" aria-label="Select all entries on this page" /></th> }
+        <th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Summary</th><th>Outcome</th><th>Ref</th>
+        @if (auth.isSuperAdmin()) { <th></th> }
+      </tr></thead>
+      <tbody>@for (a of rows(); track a.auditId) {
+        <tr [class.picked]="selected().has(a.auditId)">
+          @if (auth.isSuperAdmin()) { <td class="sel"><input type="checkbox" [checked]="selected().has(a.auditId)" (change)="toggle(a.auditId)" [attr.aria-label]="'Select ' + a.action + ' by ' + a.actor" /></td> }
+          <td>{{ a.createdAt | date: 'medium' }}</td><td>{{ a.actor }}</td><td>{{ a.action }}</td><td>{{ a.targetType }} {{ a.targetId }}</td><td>{{ a.summary }}</td>
+          <td><span class="badge" [class.ok]="a.outcome === 'SUCCESS'" [class.bad]="a.outcome !== 'SUCCESS'">{{ a.outcome }}</span></td><td><code>{{ a.correlationId }}</code></td>
+          @if (auth.isSuperAdmin()) { <td><button class="btn btn-sm danger" type="button" [disabled]="busy()" (click)="deleteOne(a)" [attr.aria-label]="'Delete ' + a.action + ' entry'"><app-icon name="trash" [size]="16" /></button></td> }
+        </tr>
+      }</tbody></table></div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

@@ -1,0 +1,12 @@
+@if (loading()) {
+  <p class="state" role="status">Loading…</p>
+} @else if (error()) {
+  <div class="state err" role="alert">
+    <p>{{ error() }}</p>
+    <button type="button" (click)="retry.emit()">Retry</button>
+  </div>
+} @else if (empty()) {
+  <p class="state">{{ emptyText() }}</p>
+} @else {
+  <ng-content />
+}

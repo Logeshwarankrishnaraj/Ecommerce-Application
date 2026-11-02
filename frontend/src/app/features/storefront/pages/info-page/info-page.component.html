@@ -1,0 +1,14 @@
+@if (loading()) {
+  <app-loading-state />
+} @else if (notFound()) {
+  <app-empty-state title="Page not found" message="This page is not available." />
+} @else if (error()) {
+  <app-empty-state kind="error" title="We couldn't load this page" [message]="error()!" actionLabel="Try again" (action)="retry()" />
+} @else {
+  <div class="container page">
+    <h1 class="page-title">{{ title() }}</h1>
+  </div>
+  @for (b of blocks(); track b.blockId) {
+    <app-block-view [block]="b" />
+  }
+}

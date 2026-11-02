@@ -1,0 +1,54 @@
+# Local development profile. NEVER deploy with this profile.
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:jewel_store}?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    show-sql: true            # prints every SQL statement to the console (independent of logger config)
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false       # plain HTTP on localhost
+app:
+  mail:
+    log-only: ${MAIL_LOG_ONLY:true}   # logs outgoing mail (incl. OTP) to the console instead of SMTP. Set false to use MailHog on 1025.
+    admin-alert-emails: ${ADMIN_ALERT_EMAILS:admin@jewelstore.local}
+  payment:
+    mode: mock
+    mock-enabled: true
+    webhook-secret: local-dev-webhook-secret
+  seed:
+    demo-accounts: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+logging:
+  level:
+    com.commerce: INFO
+    # org.hibernate.orm.jdbc.bind: TRACE  # prints bound parameter values; left off because image uploads would print their whole base64 text
+
+# Swagger UI: http://localhost:8080/swagger-ui.html  (OpenAPI JSON: /v3/api-docs). Local profile only.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+    display-request-duration: true
+    csrf:
+      enabled: true          # Swagger UI copies the XSRF-TOKEN cookie into X-XSRF-TOKEN, so POST/PUT/DELETE "Try it out" works
+  group-configs:
+    - group: 1-storefront
+      paths-to-match: /api/v1/storefront/**, /api/v1/products/**, /api/v1/categories/**, /api/v1/lookup-groups/**, /api/v1/auth/**
+    - group: 2-customer
+      paths-to-match: /api/v1/account/**, /api/v1/checkout/**, /api/v1/payments/**
+    - group: 3-admin
+      paths-to-match: /api/v1/admin/**
+    - group: 4-dev
+      paths-to-match: /api/v1/dev/**

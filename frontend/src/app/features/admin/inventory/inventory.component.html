@@ -1,0 +1,34 @@
+<div class="page-head"><h1>Inventory</h1></div>
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="iq">Search</label><input id="iq" name="q" type="search" [(ngModel)]="q" placeholder="Title or SKU" /></div>
+  <label class="lbl"><input type="checkbox" name="low" [(ngModel)]="lowOnly" /> Low stock only</label>
+  <button class="btn" type="submit">Apply</button>
+</form>
+@if (adjusting(); as a) {
+  <form class="card" (ngSubmit)="saveAdjust()">
+    <h2>Adjust stock: {{ a.sku }} — {{ a.title }}</h2>
+    <p class="hint">On hand {{ a.onHand }}, reserved {{ a.reserved }}, available {{ a.available }}. Use a negative number to remove stock.</p>
+    <div class="grid cols-2">
+      <div class="field"><label for="ad">Change (±)</label><input id="ad" name="delta" type="number" [(ngModel)]="delta" /></div>
+      <div class="field"><label for="ar">Reason (required)</label><input id="ar" name="reason" type="text" [(ngModel)]="reason" maxlength="200" placeholder="Stock count correction" /></div>
+    </div>
+    <div class="row-actions"><button class="btn primary" type="submit" [disabled]="busy()">Apply adjustment</button><button class="btn" type="button" (click)="adjusting.set(null)">Cancel</button></div>
+  </form>
+}
+@if (history(); as h) {
+  <section class="card"><h2>History: {{ h.row.sku }}</h2>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>When</th><th class="num">Change</th><th>Reason</th><th>Reference</th><th>By</th></tr></thead><tbody>
+      @for (m of h.rows; track m.movementId) { <tr><td>{{ m.createdAt | date: 'short' }}</td><td class="num">{{ m.quantityDelta }}</td><td>{{ m.reason }}</td><td>{{ m.referenceType }} {{ m.referenceId }}</td><td>{{ m.actor }}</td></tr> }
+    </tbody></table></div><button class="btn" type="button" (click)="history.set(null)">Close</button></section>
+}
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No inventory records match." (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>SKU</th><th>Title</th><th class="num">On hand</th><th class="num">Reserved</th><th class="num">Available</th><th class="num">Low at</th><th>Actions</th></tr></thead>
+      <tbody>@for (r of rows(); track r.productId) {
+        <tr><td>{{ r.sku }}</td><td>{{ r.title }} @if (r.low) { <span class="badge warn">Low</span> }</td><td class="num">{{ r.onHand }}</td><td class="num">{{ r.reserved }}</td><td class="num">{{ r.available }}</td><td class="num">{{ r.lowStockThreshold }}</td>
+          <td><div class="row-actions"><button class="btn sm" type="button" (click)="startAdjust(r)">Adjust</button><button class="btn sm" type="button" (click)="showHistory(r)">History</button></div></td></tr>
+      }</tbody></table></div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

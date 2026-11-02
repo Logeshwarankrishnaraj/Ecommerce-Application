@@ -1,0 +1,28 @@
+<div class="page-head"><h1>Categories</h1><button class="btn primary" type="button" (click)="startNew()">New category</button></div>
+@if (editing()) {
+  <form class="card" (ngSubmit)="save()">
+    <h2>{{ editId() ? 'Edit category' : 'New category' }}</h2>
+    <div class="grid cols-2">
+      <div class="field"><label for="cn">Name</label><input id="cn" name="name" type="text" [(ngModel)]="f.name" required maxlength="120" /></div>
+      <div class="field"><label for="cs">Slug (optional)</label><input id="cs" name="slug" type="text" [(ngModel)]="f.slug" maxlength="120" /></div>
+      <div class="field"><label for="cp">Parent</label>
+        <select id="cp" name="parent" [(ngModel)]="f.parentCategoryId"><option [ngValue]="null">None (top level)</option>
+          @for (c of parents(); track c.categoryId) { <option [ngValue]="c.categoryId">{{ c.name }}</option> }</select></div>
+      <div class="field"><label for="co">Sort order</label><input id="co" name="sort" type="number" [(ngModel)]="f.sortOrder" /></div>
+    </div>
+    <div class="field"><label for="cd">Description</label><textarea id="cd" name="desc" rows="2" [(ngModel)]="f.description" maxlength="1000"></textarea></div>
+    <div class="field"><label class="lbl"><input type="checkbox" name="active" [(ngModel)]="f.active" /> Active (visible in the store)</label></div>
+    <div class="row-actions"><button class="btn primary" type="submit" [disabled]="busy()">Save</button><button class="btn" type="button" (click)="editing.set(false)">Cancel</button></div>
+  </form>
+}
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No categories yet." (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Name</th><th>Slug</th><th>Parent</th><th class="num">Products</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>@for (c of rows(); track c.categoryId) {
+        <tr><td>{{ c.name }}</td><td>{{ c.slug }}</td><td>{{ parentName(c) }}</td><td class="num">{{ c.productCount }}</td>
+          <td><span class="badge" [class.ok]="c.active" [class.muted]="!c.active">{{ c.active ? 'Active' : 'Inactive' }}</span></td>
+          <td><div class="row-actions"><button class="btn sm" type="button" (click)="edit(c)">Edit</button><button class="btn sm danger" type="button" (click)="remove(c)">Delete</button></div></td></tr>
+      }</tbody></table></div>
+  </admin-state>
+</section>

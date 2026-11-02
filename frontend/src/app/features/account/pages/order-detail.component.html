@@ -1,0 +1,46 @@
+<div class="container page">
+  <app-account-nav />
+  <p><a routerLink="/account/orders">← All orders</a></p>
+  @if (loading()) { <app-loading-state /> }
+  @else if (notFound()) { <app-empty-state title="Order not found" message="We couldn't find that order." /> }
+  @else if (error() && !order()) { <app-empty-state kind="error" title="We couldn't load this order" [message]="error()!" actionLabel="Try again" (action)="load(orderId())" /> }
+  @else if (order(); as o) {
+    @if (placed) { <p class="alert alert-ok" role="status">Thank you! Your order {{ o.orderNumber }} was received.</p> }
+    <div class="row spread">
+      <h1 class="page-title">Order {{ o.orderNumber }}</h1>
+      <span class="status" [class]="'status ' + cls(o.status)">{{ label(o.status) }}</span>
+    </div>
+    <p class="muted">Placed {{ o.createdAt | date: 'medium' }} · {{ o.paymentMethod }} · payment {{ label(o.paymentStatus) }}</p>
+    <div class="cols">
+      <section class="card">
+        <h2>Items</h2>
+        <table class="tbl"><tbody>
+          @for (i of o.items; track i.orderItemId) {
+            <tr><td>{{ i.title }}<br /><span class="muted small">SKU {{ i.sku }}</span></td><td class="num">{{ i.quantity }} × {{ i.unitPrice | money: o.currency }}</td><td class="num">{{ i.lineTotal | money: o.currency }}</td></tr>
+          }
+          <tr><td colspan="2">Subtotal</td><td class="num">{{ o.subtotal | money: o.currency }}</td></tr>
+          <tr><td colspan="2">Shipping</td><td class="num">{{ o.shippingAmount | money: o.currency }}</td></tr>
+          <tr><td colspan="2">Tax</td><td class="num">{{ o.taxAmount | money: o.currency }}</td></tr>
+          @if (o.discountAmount > 0) { <tr><td colspan="2">Discount</td><td class="num">−{{ o.discountAmount | money: o.currency }}</td></tr> }
+          <tr><td colspan="2"><strong>Total</strong></td><td class="num"><strong>{{ o.total | money: o.currency }}</strong></td></tr>
+        </tbody></table>
+      </section>
+      <section class="stack">
+        <div class="card"><h2>Delivery address</h2>
+          <p>{{ o.shippingAddress.recipientName }}<br />{{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) {, {{ o.shippingAddress.line2 }}}<br />
+            {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} {{ o.shippingAddress.postalCode }}<br />{{ o.shippingAddress.country }}<br />{{ o.shippingAddress.phone }}</p></div>
+        @if (o.shipments.length) {
+          <div class="card"><h2>Shipments</h2>
+            @for (s of o.shipments; track s.shipmentId) {
+              <p><strong>{{ s.carrier }}</strong> · {{ s.trackingNumber }}<br /><span class="muted small">{{ label(s.status) }}@if (s.trackingNote) { · {{ s.trackingNote }} }</span></p>
+            }
+          </div>
+        }
+        <div class="card"><h2>Progress</h2>
+          <ol class="hist">@for (h of o.statusHistory; track $index) { <li>{{ label(h.status) }} <span class="muted small">{{ h.at | date: 'short' }}</span></li> }</ol>
+        </div>
+        @if (o.cancellable) { <button class="btn btn-danger" type="button" [disabled]="busy()" (click)="cancel(o)">{{ busy() ? 'Cancelling…' : 'Cancel order' }}</button> }
+      </section>
+    </div>
+  }
+</div>

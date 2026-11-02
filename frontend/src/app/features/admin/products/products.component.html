@@ -1,0 +1,54 @@
+<div class="page-head">
+  <h1>Products</h1>
+  <a class="btn primary" routerLink="/admin/products/new">New product</a>
+</div>
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="pq">Search</label><input id="pq" type="search" name="q" [(ngModel)]="q" placeholder="Title or SKU" /></div>
+  <div class="field"><label for="ps">Status</label>
+    <select id="ps" name="status" [(ngModel)]="status">
+      <option value="">All</option><option value="DRAFT">Draft</option><option value="PUBLISHED">Published</option><option value="ARCHIVED">Archived</option>
+    </select></div>
+  <div class="field"><label for="pc">Category</label>
+    <select id="pc" name="categoryId" [(ngModel)]="categoryId">
+      <option value="">All</option>
+      @for (c of categories(); track c.categoryId) { <option [value]="c.categoryId">{{ c.name }}</option> }
+    </select></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No products match these filters." (retry)="load()">
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th></th><th>SKU</th><th>Title</th><th>Category</th><th class="num">Price</th><th class="num">Available</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+        <tbody>
+          @for (r of rows(); track r.productId) {
+            <tr>
+              <td>@if (r.primaryImageUrl) { <img class="thumb" [src]="r.primaryImageUrl" alt="" /> }</td>
+              <td class="nowrap">{{ r.sku }}</td>
+              <td><a [routerLink]="['/admin/products', r.productId]">{{ r.title }}</a></td>
+              <td>{{ r.categoryName }}</td>
+              <td class="num">@if (r.salePrice !== null) { <s>{{ r.price | currency: 'INR' }}</s> {{ r.salePrice | currency: 'INR' }} } @else { {{ r.price | currency: 'INR' }} }</td>
+              <td class="num">{{ r.available }}</td>
+              <td><span class="badge" [class.ok]="r.status === 'PUBLISHED'" [class.muted]="r.status === 'ARCHIVED'" [class.warn]="r.status === 'DRAFT'">{{ r.status }}</span></td>
+              <td>{{ r.updatedAt | date: 'short' }}</td>
+              <td>
+                <div class="row-actions">
+                  <a class="btn sm" [routerLink]="['/admin/products', r.productId]" adminTooltip="Edit product details and images">Edit</a>
+                  @if (r.status !== 'PUBLISHED') {
+                    <button type="button" class="btn sm" [disabled]="busyId() === r.productId" (click)="lifecycle(r, 'publish')" adminTooltip="Make visible in the public catalogue">Publish</button>
+                  } @else {
+                    <button type="button" class="btn sm" [disabled]="busyId() === r.productId" (click)="lifecycle(r, 'unpublish')" adminTooltip="Hide from the public catalogue">Unpublish</button>
+                  }
+                  @if (r.status !== 'ARCHIVED') {
+                    <button type="button" class="btn sm danger" [disabled]="busyId() === r.productId" (click)="lifecycle(r, 'archive')" adminTooltip="Archive product (order history is kept)">Archive</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

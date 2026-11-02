@@ -1,0 +1,29 @@
+<div class="page-head"><h1>Filter values</h1></div>
+<p class="hint">These values power product attributes and storefront filters (material, color, size…). Deactivate a value to stop new use without breaking existing products.</p>
+<div class="filters"><div class="field"><label for="lg">Group</label>
+  <select id="lg" [ngModel]="group()" (ngModelChange)="pick($event)">
+    @for (g of groups(); track g.groupCode) { <option [value]="g.groupCode">{{ g.label }} ({{ g.valueCount }})</option> }
+  </select></div></div>
+<form class="card" (ngSubmit)="add()">
+  <h2>Add a value</h2>
+  <div class="grid cols-3">
+    <div class="field"><label for="vc">Code</label><input id="vc" name="code" type="text" [(ngModel)]="nv.valueCode" maxlength="40" placeholder="ROSE_GOLD" /></div>
+    <div class="field"><label for="vl">Label</label><input id="vl" name="label" type="text" [(ngModel)]="nv.displayLabel" maxlength="80" /></div>
+    <div class="field"><label for="vo">Sort order</label><input id="vo" name="sort" type="number" [(ngModel)]="nv.sortOrder" /></div>
+  </div>
+  <button class="btn primary" type="submit" [disabled]="busy()">Add value</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="values().length === 0" emptyText="No values in this group." (retry)="loadValues()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Code</th><th>Label</th><th class="num">Sort</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>@for (v of values(); track v.lovId) {
+        <tr><td>{{ v.valueCode }}</td>
+          <td><input class="inline" type="text" [value]="v.displayLabel" (change)="rename(v, $event)" [attr.aria-label]="'Label for ' + v.valueCode" /></td>
+          <td class="num">{{ v.sortOrder }}</td>
+          <td><span class="badge" [class.ok]="v.active" [class.muted]="!v.active">{{ v.active ? 'Active' : 'Inactive' }}</span></td>
+          <td><div class="row-actions"><button class="btn sm" type="button" (click)="toggle(v)">{{ v.active ? 'Deactivate' : 'Activate' }}</button>
+            <button class="btn sm danger" type="button" (click)="remove(v)">Delete</button></div></td></tr>
+      }</tbody></table></div>
+  </admin-state>
+</section>

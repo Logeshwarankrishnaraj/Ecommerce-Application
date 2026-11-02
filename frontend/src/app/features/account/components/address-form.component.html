@@ -1,0 +1,17 @@
+<form class="form card" [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <h3>{{ address()?.addressId ? 'Edit address' : 'New address' }}</h3>
+  <div class="form-grid">
+    @for (f of fields; track f.name) {
+      <div class="field" [class.invalid]="msg(f.name)">
+        <label [for]="'a-' + f.name">{{ f.label }}</label>
+        <input [id]="'a-' + f.name" class="input" [formControlName]="f.name" [attr.autocomplete]="f.auto" />
+        @if (msg(f.name); as m) { <span class="err">{{ m }}</span> }
+      </div>
+    }
+  </div>
+  <label class="check"><input type="checkbox" formControlName="isDefault" /> Make this my default address</label>
+  <div class="row">
+    <button class="btn btn-primary" type="submit" [disabled]="busy()">{{ busy() ? 'Saving…' : 'Save address' }}</button>
+    <button class="btn" type="button" (click)="cancelled.emit()">Cancel</button>
+  </div>
+</form>

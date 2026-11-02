@@ -1,0 +1,4 @@
+.plain { list-style: none; margin: 0; padding: 0; }
+.plain li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--c-border, #e5e0d8); }
+.stat a { color: var(--c-accent, #b76e79); text-decoration: none; }
+code { font-size: .75rem; word-break: break-all; }

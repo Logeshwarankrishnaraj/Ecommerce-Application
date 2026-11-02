@@ -1,0 +1,1 @@
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 140px; } .bar { flex: 1; min-height: 2px; background: var(--c-accent, #9c7a3c); }

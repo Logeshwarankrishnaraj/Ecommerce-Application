@@ -1,0 +1,30 @@
+<div class="page-head"><h1>Bulk product import</h1><button class="btn" type="button" (click)="download(api.importTemplateUrl(), 'products-template.csv')">Download CSV template</button></div>
+<p class="hint">Upload a CSV (and optionally a ZIP of JPEG/PNG images named in the <code>image_files</code> column). You always get a preview first; nothing is saved until you confirm.</p>
+<form class="card" (ngSubmit)="preview()">
+  <div class="grid cols-2">
+    <div class="field"><label for="if">CSV file</label><input id="if" type="file" accept=".csv,text/csv" (change)="csv = pick($event)" /></div>
+    <div class="field"><label for="iz">Images ZIP (optional)</label><input id="iz" type="file" accept=".zip,application/zip" (change)="zip = pick($event)" /></div>
+    <div class="field"><label for="im">Mode</label><select id="im" name="mode" [(ngModel)]="mode"><option value="CREATE">Create new products</option><option value="UPDATE">Update existing (by SKU)</option></select></div>
+    <div class="field"><label class="lbl"><input type="checkbox" name="partial" [(ngModel)]="allowPartial" /> Allow partial import (skip invalid rows)</label>
+      <span class="hint">Off by default: if any row is invalid, nothing is imported.</span></div>
+  </div>
+  <button class="btn primary" type="submit" [disabled]="busy()">{{ busy() ? 'Checking…' : 'Preview import' }}</button>
+</form>
+@if (job(); as j) {
+  <section class="card">
+    <h2>{{ j.status === 'COMMITTED' ? 'Import finished' : 'Preview' }} — {{ j.filename }}</h2>
+    <p>{{ j.totalRows }} rows · <strong>{{ j.validRows }}</strong> valid · <strong>{{ j.invalidRows }}</strong> invalid@if (j.status === 'COMMITTED') { · <strong>{{ j.committedRows }}</strong> imported }</p>
+    <div class="row-actions">
+      @if (j.status === 'PREVIEWED') {
+        <button class="btn primary" type="button" [disabled]="busy() || j.validRows === 0 || (!j.allowPartial && j.invalidRows > 0)" (click)="commit(j)">Confirm and import</button>
+        @if (!j.allowPartial && j.invalidRows > 0) { <span class="hint">Fix the errors and re-upload, or enable partial import.</span> }
+      }
+      @if (j.invalidRows > 0) { <button class="btn" type="button" (click)="download(api.importErrorsUrl(j.jobId), 'import-errors.csv')">Download errors CSV</button> }
+    </div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Row</th><th>SKU</th><th>Result</th><th>Problems</th></tr></thead><tbody>
+      @for (r of j.rows; track r.rowNumber) {
+        <tr><td>{{ r.rowNumber }}</td><td>{{ r.sku }}</td><td><span class="badge" [class.ok]="r.valid" [class.bad]="!r.valid">{{ r.result }}</span></td>
+          <td>@for (e of r.errors; track $index) { <div class="err-text">{{ e.column }}: {{ e.message }}</div> }</td></tr>
+      }</tbody></table></div>
+  </section>
+}

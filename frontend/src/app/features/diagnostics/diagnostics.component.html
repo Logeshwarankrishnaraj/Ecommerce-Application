@@ -1,0 +1,27 @@
+<section class="container" style="padding-block: 24px">
+  <h1>Connection check</h1>
+  <p class="small">Page origin: <code>{{ origin }}</code>. API calls go to the same origin and are forwarded to the backend by the dev proxy.</p>
+  <div class="card" style="margin-bottom: 16px">
+    <h2>Optional: test a real login</h2>
+    <p class="small">Runs <code>POST /api/v1/auth/login</code>. In the backend console you should then see an <code>API POST /api/v1/auth/login</code> line and a <code>select ... from app_users</code> SQL line.</p>
+    <div class="form" style="display:flex; gap:8px; flex-wrap:wrap">
+      <input class="input" placeholder="username or email" [(ngModel)]="user" name="u" autocomplete="off" />
+      <input class="input" type="password" placeholder="password" [(ngModel)]="pass" name="p" autocomplete="off" />
+    </div>
+  </div>
+  <button class="btn btn-primary" (click)="run()" [disabled]="running()">{{ running() ? 'Checking…' : 'Run checks' }}</button>
+  <table class="tbl" style="margin-top: 16px">
+    <thead><tr><th>Check</th><th>Request</th><th>Result</th><th>Detail</th></tr></thead>
+    <tbody>
+      @for (s of steps(); track s.name) {
+        <tr>
+          <td>{{ s.name }}</td>
+          <td><code>{{ s.request }}</code></td>
+          <td>{{ s.status === 'ok' ? 'OK' : s.status === 'fail' ? 'FAILED' : '…' }} @if (s.ms !== undefined) { <span class="small">({{ s.ms }} ms)</span> }</td>
+          <td>{{ s.detail }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+  @if (verdict()) { <p class="alert" [class.alert-error]="!allOk()" style="margin-top:16px">{{ verdict() }}</p> }
+</section>

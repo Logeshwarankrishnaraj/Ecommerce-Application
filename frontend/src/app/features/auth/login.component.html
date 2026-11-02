@@ -1,0 +1,18 @@
+<section class="card narrow">
+  <h1>Sign in</h1>
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="field" [class.invalid]="msg('usernameOrEmail')">
+      <label for="u">Username or email</label>
+      <input id="u" class="input" formControlName="usernameOrEmail" autocomplete="username" />
+      @if (msg('usernameOrEmail'); as m) { <span class="err">{{ m }}</span> }
+    </div>
+    <div class="field" [class.invalid]="msg('password')">
+      <label for="p">Password</label>
+      <input id="p" class="input" type="password" formControlName="password" autocomplete="current-password" />
+      @if (msg('password'); as m) { <span class="err">{{ m }}</span> }
+    </div>
+    <button class="btn btn-primary" type="submit" [disabled]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
+  </form>
+  <p class="small"><a routerLink="/forgot-password">Forgot your password?</a></p>
+  <p class="small">New here? <a routerLink="/register">Create an account</a></p>
+</section>

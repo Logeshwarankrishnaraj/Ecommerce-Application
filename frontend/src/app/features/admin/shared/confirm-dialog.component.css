@@ -1,0 +1,9 @@
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: grid; place-items: center; z-index: 2000; padding: 16px; }
+.dialog { background: var(--c-surface, #fff); color: var(--c-text, #1a1a1a); border-radius: 8px; padding: 20px; max-width: 440px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+h2 { margin: 0 0 8px; font-size: 1.1rem; font-family: var(--font-heading, serif); }
+.subject { font-weight: 600; margin: 0 0 8px; word-break: break-word; }
+.actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.btn { border: 1px solid var(--c-border, #e5e0d8); background: var(--c-surface, #fff); padding: 8px 14px; border-radius: 6px; cursor: pointer; font: inherit; }
+.btn.primary { background: var(--c-accent, #b76e79); color: var(--c-on-accent, #fff); border-color: transparent; }
+.btn.danger { background: #b42318; color: #fff; border-color: transparent; }
+.btn:focus-visible { outline: 2px solid var(--c-accent, #b76e79); outline-offset: 2px; }

@@ -1,0 +1,29 @@
+<div class="page-head"><h1>Product analytics</h1></div>
+<p class="hint">Views are counted once per visitor per product per 30 minutes; wishlist and cart adds once per customer per 10 minutes. Counts reflect engagement, not sales.</p>
+<form class="filters" (ngSubmit)="load()">
+  <div class="field"><label for="af">From</label><input id="af" name="from" type="date" [(ngModel)]="from" /></div>
+  <div class="field"><label for="at">To</label><input id="at" name="to" type="date" [(ngModel)]="to" /></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<admin-state [loading]="loading()" [error]="error()" (retry)="load()">
+  @if (data(); as d) {
+    <div class="grid cols-3">
+      <div class="card"><div class="stat">{{ d.totals.views }}</div><div class="stat-label">Product views</div></div>
+      <div class="card"><div class="stat">{{ d.totals.wishlistAdds }}</div><div class="stat-label">Wishlist adds</div></div>
+      <div class="card"><div class="stat">{{ d.totals.cartAdds }}</div><div class="stat-label">Cart adds</div></div>
+    </div>
+    <section class="card"><h2>Daily views</h2>
+      @if (d.daily.length === 0) { <p class="hint">No activity in this range.</p> } @else {
+        <div class="bars" role="img" [attr.aria-label]="'Daily product views from ' + d.from + ' to ' + d.to">
+          @for (x of d.daily; track x.date) { <div class="bar" [style.height.%]="pct(x.views, d)" [title]="x.date + ': ' + x.views + ' views'"></div> }
+        </div>
+        <p class="hint">{{ d.from }} → {{ d.to }} (UTC)</p>
+      }
+    </section>
+    <section class="card"><h2>Top products</h2>
+      <div class="table-wrap"><table class="tbl"><thead><tr><th>SKU</th><th>Product</th><th class="num">Views</th><th class="num">Wishlist</th><th class="num">Cart</th></tr></thead><tbody>
+        @for (p of d.products; track p.productId) { <tr><td>{{ p.sku }}</td><td>{{ p.title }}</td><td class="num">{{ p.views }}</td><td class="num">{{ p.wishlistAdds }}</td><td class="num">{{ p.cartAdds }}</td></tr> }
+        @if (d.products.length === 0) { <tr><td colspan="5" class="hint">No data yet.</td></tr> }
+      </tbody></table></div></section>
+  }
+</admin-state>

@@ -1,0 +1,55 @@
+<div class="page-head"><h1>Dashboard</h1></div>
+<admin-state [loading]="loading()" [error]="error()" (retry)="load()">
+  @if (summary(); as s) {
+    <div class="grid cols-3">
+      <div class="card"><div class="stat-label">Orders</div><div class="stat">{{ totalOrders() }}</div></div>
+      <div class="card"><div class="stat-label">Gross order value</div><div class="stat">{{ s.grossOrderValue | number: '1.2-2' }}</div>
+        <div class="hint">Excludes cancelled orders.</div></div>
+      <div class="card"><div class="stat-label">Products</div><div class="stat">{{ s.productCount }}</div></div>
+      <div class="card"><div class="stat-label">Low stock</div><div class="stat">
+        <a routerLink="/admin/inventory" [queryParams]="{ lowOnly: true }">{{ s.lowStockCount }}</a></div></div>
+      <div class="card"><div class="stat-label">Open errors</div><div class="stat">
+        <a routerLink="/admin/errors">{{ s.openErrorCount }}</a></div></div>
+    </div>
+
+    <div class="grid cols-2">
+      <section class="card" aria-labelledby="oc">
+        <h2 id="oc">Orders by status</h2>
+        <ul class="plain">
+          @for (e of s.orderCountsByStatus | keyvalue; track e.key) {
+            <li><span>{{ e.key }}</span><strong>{{ e.value }}</strong></li>
+          }
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="pi">
+        <h2 id="pi">Product interactions</h2>
+        <p class="hint">Admin-only aggregates from {{ s.interactions.from }} to {{ s.interactions.to }} ({{ s.timezone }}).</p>
+        <ul class="plain">
+          <li><span>Views</span><strong>{{ s.interactions.views }}</strong></li>
+          <li><span>Wishlist adds</span><strong>{{ s.interactions.wishlistAdds }}</strong></li>
+          <li><span>Cart adds</span><strong>{{ s.interactions.cartAdds }}</strong></li>
+        </ul>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="re">
+      <h2 id="re">Recent errors</h2>
+      <admin-state [empty]="s.recentErrors.length === 0" emptyText="No recent errors.">
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>When</th><th>Severity</th><th>Operation</th><th>Summary</th><th>Ref</th></tr></thead>
+            <tbody>
+              @for (e of s.recentErrors; track e.eventId) {
+                <tr>
+                  <td>{{ e.lastOccurredAt | date: 'short' }}</td>
+                  <td><span class="badge" [class.bad]="e.severity === 'HIGH' || e.severity === 'CRITICAL'">{{ e.severity }}</span></td>
+                  <td>{{ e.operation }}</td><td>{{ e.summary }}</td><td><code>{{ e.correlationId }}</code></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </admin-state>
+    </section>
+  }
+</admin-state>

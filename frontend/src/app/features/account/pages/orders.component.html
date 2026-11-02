@@ -1,0 +1,33 @@
+<div class="container page">
+  <app-account-nav />
+  <h1 class="page-title">Your orders</h1>
+  @if (loading()) { <app-loading-state /> }
+  @else if (error()) { <app-empty-state kind="error" title="We couldn't load your orders" [message]="error()!" actionLabel="Try again" (action)="load(0)" /> }
+  @else if (rows().length === 0) { <app-empty-state title="No orders yet" message="When you place an order it will show up here." /> }
+  @else {
+    <div class="table-wrap card">
+      <table class="tbl">
+        <thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Payment</th><th class="num">Items</th><th class="num">Total</th></tr></thead>
+        <tbody>
+          @for (o of rows(); track o.orderId) {
+            <tr>
+              <td><a [routerLink]="['/account/orders', o.orderId]">{{ o.orderNumber }}</a></td>
+              <td>{{ o.createdAt | date: 'mediumDate' }}</td>
+              <td><span class="status" [class]="'status ' + cls(o.status)">{{ label(o.status) }}</span></td>
+              <td>{{ o.paymentMethod }} · {{ label(o.paymentStatus) }}</td>
+              <td class="num">{{ o.itemCount }}</td>
+              <td class="num">{{ o.total | money: o.currency }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (totalPages() > 1) {
+      <nav class="pager" aria-label="Pagination">
+        <button class="btn btn-sm" type="button" [disabled]="page() === 0" (click)="load(page() - 1)">Previous</button>
+        <span>Page {{ page() + 1 }} of {{ totalPages() }}</span>
+        <button class="btn btn-sm" type="button" [disabled]="page() + 1 >= totalPages()" (click)="load(page() + 1)">Next</button>
+      </nav>
+    }
+  }
+</div>

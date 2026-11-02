@@ -1,0 +1,98 @@
+/* Admin shell. Buttons, fields, tables, badges and cards come from the global design system (styles.css);
+   only the layout and admin-specific patterns live here. */
+.admin-shell { min-height: 100vh; background: var(--c-bg); color: var(--c-text); font-family: var(--font-body); font-size: 15px; overflow-x: hidden; --control-h: 40px; --control-h-sm: 32px; }
+.admin-shell * { box-sizing: border-box; }
+
+.admin-top { display: flex; align-items: center; gap: var(--sp-3); height: 60px; padding: 0 var(--sp-4); background: var(--c-surface); border-bottom: 1px solid var(--c-border); position: sticky; top: 0; z-index: 50; }
+.admin-brand { font-family: var(--font-heading); letter-spacing: .16em; text-transform: uppercase; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 10px; }
+.admin-brand app-icon { color: var(--c-accent); }
+.admin-spacer { flex: 1; }
+.admin-user { color: var(--c-muted); font-size: .875rem; display: inline-flex; align-items: center; gap: 8px; }
+.admin-user em { font-style: normal; font-size: .72rem; padding: 2px 8px; border-radius: 999px; background: var(--c-accent-soft); color: var(--c-accent); font-weight: 600; }
+.admin-link { color: var(--c-text); text-decoration: none; font-size: .875rem; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border-radius: 8px; }
+.admin-link:hover { background: var(--c-hover); color: var(--c-accent); }
+.admin-burger { display: none; flex: none; width: 44px; height: 44px; }
+
+.admin-body { display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+.admin-nav { display: flex; flex-direction: column; padding: var(--sp-3); gap: 2px; border-right: 1px solid var(--c-border); background: var(--c-surface); min-height: calc(100vh - 60px); position: sticky; top: 60px; align-self: start; max-height: calc(100vh - 60px); overflow-y: auto; }
+.admin-nav a { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 var(--sp-3); border-radius: 8px; color: var(--c-text); text-decoration: none; font-size: .92rem; font-weight: 500; }
+.admin-nav a app-icon { color: var(--c-muted); flex: none; }
+.admin-nav a:hover { background: var(--c-hover); }
+.admin-nav a.active { background: var(--c-accent-soft); color: var(--c-accent); font-weight: 600; }
+.admin-nav a.active app-icon { color: var(--c-accent); }
+.admin-nav .nav-group { margin: var(--sp-4) var(--sp-3) var(--sp-1); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--c-muted); font-weight: 600; }
+.admin-main { padding: var(--sp-5) var(--sp-5) var(--sp-7); min-width: 0; max-width: 1400px; }
+.admin-scrim { display: none; }
+
+@media (max-width: 900px) {
+  .admin-burger { display: inline-grid; margin-left: -8px; }
+  .admin-body { grid-template-columns: minmax(0, 1fr); }
+  .admin-nav { display: none; position: fixed; z-index: 60; top: 60px; left: 0; bottom: 0; width: min(300px, 86vw); min-height: 0; border-right: 1px solid var(--c-border); box-shadow: var(--shadow-lg); max-height: none; }
+  .admin-nav.open { display: flex; }
+  .admin-scrim.open { display: block; position: fixed; inset: 60px 0 0 0; background: rgba(20, 16, 10, .35); z-index: 55; }
+  .admin-user .nm, .admin-link .lt { display: none; }
+  .admin-main { padding: var(--sp-4) var(--sp-4) var(--sp-6); }
+}
+
+/* ---- page structure ---- */
+.admin-shell h1 { font-family: var(--font-heading); font-size: 1.6rem; line-height: 1.2; margin: 0 0 var(--sp-4); font-weight: 600; }
+.admin-shell h2 { font-size: 1.05rem; margin: 0 0 var(--sp-3); font-weight: 600; }
+.admin-shell h3 { font-size: .95rem; margin: 0 0 var(--sp-2); font-weight: 600; }
+.admin-shell .page-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-4); }
+.admin-shell .page-head h1 { margin: 0; }
+.admin-shell .card { padding: var(--sp-5); margin-bottom: var(--sp-4); box-shadow: none; }
+.admin-shell .card > h2:first-child { padding-bottom: var(--sp-3); border-bottom: 1px solid var(--c-border); margin-bottom: var(--sp-4); }
+.admin-shell .grid { display: grid; gap: var(--sp-4); }
+.admin-shell .grid.cols-2 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.admin-shell .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.admin-shell .grid > .card { margin-bottom: 0; }
+
+/* ---- filters bar: label above, all controls the same height, button aligned to the inputs ---- */
+.admin-shell .filters { display: flex; gap: var(--sp-3); flex-wrap: wrap; align-items: flex-end; margin-bottom: var(--sp-4); padding: var(--sp-4); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); }
+.admin-shell .filters .field { margin-bottom: 0; min-width: 160px; flex: 1 1 160px; max-width: 320px; }
+.admin-shell .filters .btn { flex: none; }
+
+.admin-shell .row-actions { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; }
+.admin-shell .tbl td { vertical-align: middle; }
+.admin-shell .tbl td .btn { white-space: nowrap; }
+
+/* ---- feedback ---- */
+.admin-shell .banner { padding: 12px var(--sp-4); border-radius: var(--radius-sm, 8px); margin-bottom: var(--sp-4); font-size: .9rem; border: 1px solid transparent; }
+.admin-shell .banner.error { background: var(--bg-bad); color: var(--fg-bad); border-color: color-mix(in srgb, var(--fg-bad) 30%, var(--bg-bad)); }
+.admin-shell .banner.warn { background: var(--bg-warn); color: var(--fg-warn); border-color: color-mix(in srgb, var(--fg-warn) 30%, var(--bg-warn)); }
+.admin-shell .banner.ok { background: var(--bg-ok); color: var(--fg-ok); border-color: color-mix(in srgb, var(--fg-ok) 30%, var(--bg-ok)); }
+.admin-shell .err-text { color: var(--c-danger); font-size: .8rem; }
+
+/* ---- dashboard stats ---- */
+.admin-shell .stat { font-size: 1.75rem; font-weight: 600; line-height: 1.1; font-family: var(--font-heading); }
+.admin-shell .stat-label { color: var(--c-muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-bottom: var(--sp-2); }
+
+/* ---- dialogs ---- */
+.admin-shell .modal-backdrop { position: fixed; inset: 0; background: rgba(20, 16, 10, .45); display: grid; place-items: center; z-index: 1500; padding: var(--sp-4); }
+.admin-shell .modal { background: var(--c-surface); border-radius: var(--radius-lg); padding: var(--sp-5); width: min(520px, 100%); max-height: 90vh; overflow: auto; box-shadow: var(--shadow-lg); }
+.admin-shell .thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: var(--c-subtle); border: 1px solid var(--c-border); display: block; }
+
+/* tables: compact cells, keep short identifiers on one line */
+.admin-shell .tbl th, .admin-shell .tbl td { padding: 10px 12px; }
+.admin-shell .tbl td:first-child, .admin-shell .tbl th:first-child { padding-left: 12px; }
+.admin-shell .tbl td.nowrap, .admin-shell .tbl td.num { white-space: nowrap; }
+.admin-shell .card:has(> .table-wrap:first-child) { padding: var(--sp-3); }
+.admin-shell .grid { margin-bottom: var(--sp-4); }
+
+/* ---- checkbox / toggle labels sit inline with their box ---- */
+.admin-shell label.lbl, .admin-shell .field > label.lbl { display: inline-flex; align-items: center; gap: 10px; font-size: .92rem; font-weight: 500; color: var(--c-text); cursor: pointer; min-height: 32px; }
+.admin-shell input[type=checkbox], .admin-shell input[type=radio] { width: 20px; height: 20px; accent-color: var(--c-accent); flex: none; margin: 0; }
+.admin-shell input[type=file] { font: inherit; font-size: .9rem; max-width: 100%; }
+
+/* ---- fields stacked directly inside a card get even vertical rhythm ---- */
+.admin-shell .card > .field, .admin-shell .card > form > .field { margin-bottom: var(--sp-4); }
+.admin-shell .card > .field:last-child { margin-bottom: 0; }
+
+/* ---- destructive actions in rows/tables: outlined until hovered, so a table is not a wall of red ---- */
+.admin-shell .row-actions .btn.danger, .admin-shell td .btn.danger {
+  background: transparent; color: var(--c-danger); border: 1px solid color-mix(in srgb, var(--c-danger) 45%, transparent);
+}
+.admin-shell .row-actions .btn.danger:hover:not(:disabled), .admin-shell td .btn.danger:hover:not(:disabled) { background: var(--c-danger-solid); color: #fff; border-color: var(--c-danger-solid); }
+
+.admin-shell .stat a { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; }
+.admin-shell .tbl td input[type=checkbox] { width: 24px; height: 24px; }

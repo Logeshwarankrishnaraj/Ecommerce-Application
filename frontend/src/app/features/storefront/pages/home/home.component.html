@@ -1,0 +1,11 @@
+@if (loading()) {
+  <app-loading-state label="Loading storefront…" />
+} @else if (error()) {
+  <app-empty-state kind="error" title="We couldn't load the store" [message]="error()!" actionLabel="Try again" (action)="load()" />
+} @else if (blocks().length === 0) {
+  <app-empty-state title="Welcome" message="Our collection is being prepared. Please check back soon." />
+} @else {
+  @for (b of blocks(); track b.blockId) {
+    <app-block-view [block]="b" />
+  }
+}

@@ -1,0 +1,18 @@
+@if (open()) {
+  <div class="backdrop" (click)="cancelled.emit()" (keydown.escape)="cancelled.emit()" role="presentation">
+    <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="cd-title" aria-describedby="cd-msg"
+         tabindex="-1" (click)="$event.stopPropagation()" (keydown.escape)="cancelled.emit()">
+      <h2 id="cd-title">{{ title() }}</h2>
+      <p id="cd-msg">{{ message() }}</p>
+      @if (subject()) {
+        <p class="subject">{{ subject() }}</p>
+      }
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" (click)="cancelled.emit()" [disabled]="busy()">Cancel</button>
+        <button type="button" class="btn btn-danger" (click)="confirmed.emit()" [disabled]="busy()" autofocus>
+          {{ busy() ? 'Working…' : confirmLabel() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

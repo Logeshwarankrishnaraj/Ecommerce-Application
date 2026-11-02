@@ -1,0 +1,24 @@
+<div class="container page">
+  <div class="page-head"><h1 class="page-title">Your wishlist</h1>@if (wishlist.wishlist().items.length > 0) { <span class="muted">{{ wishlist.wishlist().items.length }} saved</span> }</div>
+  @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+  @if (loading()) { <app-loading-state /> }
+  @else if (wishlist.wishlist().items.length === 0) {
+    <app-empty-state title="Nothing saved yet" message="Tap the heart on any piece to keep it here." />
+    <p class="center"><a class="btn btn-primary" routerLink="/products">Browse jewelry</a></p>
+  } @else {
+    <div class="grid-products">
+      @for (i of wishlist.wishlist().items; track i.productId) {
+        <div class="wl-item">
+          <app-product-card [product]="i.product" [wished]="true" (wishlistToggle)="remove(i.productId)" />
+          @if (i.product.inStock) {
+            <button type="button" class="btn btn-primary btn-block" [disabled]="movingId() !== null" (click)="moveToCart(i)">
+              {{ movingId() === i.productId ? 'Moving…' : 'Move to cart' }}
+            </button>
+          } @else {
+            <p class="muted small center">Currently out of stock</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

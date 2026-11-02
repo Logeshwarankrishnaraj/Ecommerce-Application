@@ -1,0 +1,21 @@
+<div class="page-head"><h1>Orders</h1>
+  <button class="btn" type="button" (click)="exportCsv()" [disabled]="exporting() || total() === 0">{{ exporting() ? 'Preparing…' : 'Export CSV' }}</button></div>
+@if (exportError()) { <p class="alert alert-error" role="alert">{{ exportError() }}</p> }
+<form class="filters" (ngSubmit)="search()">
+  <div class="field"><label for="oq">Search</label><input id="oq" name="q" type="search" [(ngModel)]="q" placeholder="Order number, customer name or email" /></div>
+  <div class="field"><label for="os">Status</label><select id="os" name="status" [(ngModel)]="status"><option value="">All</option>
+    @for (s of statuses; track s) { <option [value]="s">{{ label(s) }}</option> }</select></div>
+  <button class="btn" type="submit">Apply</button>
+</form>
+<section class="card">
+  <admin-state [loading]="loading()" [error]="error()" [empty]="rows().length === 0" emptyText="No orders match." (retry)="load()">
+    <div class="table-wrap"><table class="tbl">
+      <thead><tr><th>Order</th><th>Date</th><th>Customer</th><th>Status</th><th>Payment</th><th class="num">Total</th></tr></thead>
+      <tbody>@for (o of rows(); track o.orderId) {
+        <tr><td><a [routerLink]="['/admin/orders', o.orderId]">{{ o.orderNumber }}</a></td><td>{{ o.createdAt | date: 'short' }}</td><td>{{ o.customerName }}</td>
+          <td><span class="badge" [class.ok]="cls(o.status) === 'good'" [class.bad]="cls(o.status) === 'bad'" [class.warn]="cls(o.status) === 'warn'">{{ label(o.status) }}</span></td>
+          <td>{{ o.paymentMethod }} · {{ label(o.paymentStatus) }}</td><td class="num">{{ o.total.toFixed(2) }}</td></tr>
+      }</tbody></table></div>
+    <admin-pager [page]="page()" [totalPages]="totalPages()" [totalElements]="total()" (pageChange)="goTo($event)" />
+  </admin-state>
+</section>

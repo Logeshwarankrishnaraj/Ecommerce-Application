@@ -1,0 +1,3 @@
+.sel { width: 44px; text-align: center; }
+tr.picked { background: var(--c-accent-soft); }
+.hint { margin: 0 0 var(--sp-4); }

@@ -1,0 +1,5 @@
+<nav class="pager" aria-label="Pagination">
+  <button type="button" [disabled]="!hasPrev()" (click)="pageChange.emit(page() - 1)">‹ Previous</button>
+  <span>Page {{ totalPages() === 0 ? 0 : page() + 1 }} of {{ totalPages() }} · {{ totalElements() }} total</span>
+  <button type="button" [disabled]="!hasNext()" (click)="pageChange.emit(page() + 1)">Next ›</button>
+</nav>

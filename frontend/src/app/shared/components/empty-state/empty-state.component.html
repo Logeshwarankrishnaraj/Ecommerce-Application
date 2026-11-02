@@ -1,0 +1,10 @@
+<div class="state" [class.error]="kind() === 'error'" [attr.role]="kind() === 'error' ? 'alert' : null">
+  <h2>{{ title() }}</h2>
+  @if (message()) {
+    <p>{{ message() }}</p>
+  }
+  @if (actionLabel()) {
+    <button type="button" class="btn btn-primary" (click)="action.emit()">{{ actionLabel() }}</button>
+  }
+  <ng-content />
+</div>

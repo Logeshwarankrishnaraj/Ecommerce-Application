@@ -1,0 +1,56 @@
+@if (loading()) { <app-loading-state /> }
+@else if (notFound()) { <app-empty-state title="Product not found" message="This item is no longer available." /> }
+@else if (error()) { <app-empty-state kind="error" title="We couldn't load this product" [message]="error()!" actionLabel="Try again" (action)="load(slug())" /> }
+@else if (product(); as p) {
+  <div class="container page">
+    <div class="cols">
+      <app-image-gallery [images]="p.images" [fallbackAlt]="p.title" />
+      <div class="info">
+        @if (p.categoryName) { <p class="eyebrow">{{ p.categoryName }}</p> }
+        <h1>{{ p.title }}</h1>
+        <p class="price">
+          <strong>{{ p.effectivePrice | money: p.currency }}</strong>
+          @if (p.salePrice !== null && p.salePrice < p.price) { <s class="muted">{{ p.price | money: p.currency }}</s> }
+        </p>
+        <p class="stock" [class.bad]="p.stockStatus === 'OUT_OF_STOCK'" role="status">
+          @switch (p.stockStatus) {
+            @case ('OUT_OF_STOCK') { Out of stock }
+            @case ('LOW_STOCK') { Only {{ p.availableQuantity }} left }
+            @default { In stock }
+          }
+        </p>
+        @if (p.stockStatus !== 'OUT_OF_STOCK') {
+          <div class="buy">
+            <div class="qty" role="group" aria-label="Quantity">
+              <button type="button" aria-label="Decrease quantity" [disabled]="qty() <= 1" (click)="step(-1, p)"><app-icon name="minus" [size]="16" /></button>
+              <input id="qty" type="number" inputmode="numeric" min="1" [max]="maxQty(p)" [value]="qty()" (input)="setQty($event, p)" aria-label="Quantity" />
+              <button type="button" aria-label="Increase quantity" [disabled]="qty() >= maxQty(p)" (click)="step(1, p)"><app-icon name="plus" [size]="16" /></button>
+            </div>
+            <button class="btn btn-primary btn-lg grow" type="button" [disabled]="busy()" (click)="addToCart(p)"><app-icon name="bag" [size]="18" /> {{ busy() ? 'Adding…' : 'Add to cart' }}</button>
+            <button class="btn btn-lg btn-icon" type="button" [attr.aria-pressed]="wishlist.has(p.productId)" [attr.aria-label]="wishlist.has(p.productId) ? 'Remove from wishlist' : 'Save to wishlist'" (click)="actions.toggle(p.productId)">
+              <app-icon name="heart" [filled]="wishlist.has(p.productId)" />
+            </button>
+          </div>
+        } @else {
+          <button class="btn btn-lg" type="button" (click)="actions.toggle(p.productId)"><app-icon name="heart" [filled]="wishlist.has(p.productId)" /> {{ wishlist.has(p.productId) ? 'Saved' : 'Save for later' }}</button>
+        }
+        @if (p.description) { <section class="block"><h2>Description</h2><p>{{ p.description }}</p></section> }
+        @if (p.attributes.length) {
+          <section class="block"><h2>Specifications</h2><dl class="attrs">
+            @for (a of p.attributes; track a.code) { <div><dt>{{ a.label }}</dt><dd>{{ a.valueLabel }}</dd></div> }
+          <div><dt>SKU</dt><dd>{{ p.sku }}</dd></div>
+          </dl></section>
+        } @else { <p class="muted small">SKU {{ p.sku }}</p> }
+        <ul class="trust"><li><app-icon name="truck" [size]="18" /> Insured delivery</li><li><app-icon name="shield" [size]="18" /> Secure checkout</li><li><app-icon name="refresh" [size]="18" /> Easy returns</li></ul>
+      </div>
+    </div>
+    @if (related().length) {
+      <h2 class="section-title">You may also like</h2>
+      <div class="grid-products">
+        @for (r of related(); track r.productId) {
+          <app-product-card [product]="r" [wished]="wishlist.has(r.productId)" (wishlistToggle)="actions.toggle($event.productId)" />
+        }
+      </div>
+    }
+  </div>
+}

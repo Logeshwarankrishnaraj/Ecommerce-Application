@@ -1,0 +1,1 @@
+.cols { display: grid; gap: 20px; } @media (min-width: 900px) { .cols { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; } } .hist { margin: 0; padding-left: 18px; }

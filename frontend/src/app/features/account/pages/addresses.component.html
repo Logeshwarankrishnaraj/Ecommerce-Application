@@ -1,0 +1,27 @@
+<div class="container page">
+  <app-account-nav />
+  <div class="row spread"><h1 class="page-title">Address book</h1>
+    @if (!editing()) { <button class="btn btn-primary" type="button" (click)="editing.set('new')">Add address</button> }
+  </div>
+  @if (error()) { <p class="alert alert-error" role="alert">{{ error() }}</p> }
+  @if (editing(); as e) {
+    <app-address-form [address]="e === 'new' ? null : e" (saved)="saved()" (cancelled)="editing.set(null)" />
+  }
+  @if (loading()) { <app-loading-state /> }
+  @else if (list().length === 0 && !editing()) { <app-empty-state title="No saved addresses" message="Add one to speed up checkout." /> }
+  @else {
+    <div class="grid">
+      @for (a of list(); track a.addressId) {
+        <article class="card">
+          @if (a.isDefault) { <span class="status good">Default</span> }
+          <p><strong>{{ a.recipientName }}</strong><br />{{ a.line1 }}@if (a.line2) {, {{ a.line2 }}}<br />
+            @if (a.locality) { {{ a.locality }}, }{{ a.city }}, {{ a.state }} {{ a.postalCode }}<br />{{ a.country }}<br />{{ a.phone }}</p>
+          <div class="row">
+            <button class="btn btn-sm" type="button" (click)="editing.set(a)">Edit</button>
+            <button class="btn btn-sm btn-danger" type="button" (click)="remove(a)">Delete</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,60 @@
+<div class="page-head"><h1>Site builder</h1></div>
+<admin-state [loading]="loading()" [error]="error()" (retry)="load()">
+  <section class="card">
+    <h2>Navigation links</h2>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Where</th><th>Label</th><th>URL</th><th>Order</th><th>Active</th><th></th></tr></thead><tbody>
+      @for (l of links(); track $index; let i = $index) {
+        <tr><td><select [(ngModel)]="l.placement" [name]="'pl' + i"><option value="HEADER">Header</option><option value="FOOTER">Footer</option></select></td>
+          <td><input type="text" [(ngModel)]="l.label" [name]="'lb' + i" maxlength="60" [attr.aria-label]="'Label ' + (i + 1)" /></td>
+          <td><input type="text" [(ngModel)]="l.url" [name]="'ur' + i" maxlength="300" placeholder="/products or https://…" [attr.aria-label]="'URL ' + (i + 1)" /></td>
+          <td><input type="number" [(ngModel)]="l.sortOrder" [name]="'so' + i" style="width:70px" [attr.aria-label]="'Order ' + (i + 1)" /></td>
+          <td><input type="checkbox" [(ngModel)]="l.active" [name]="'ac' + i" [attr.aria-label]="'Active ' + (i + 1)" /></td>
+          <td><button class="btn sm danger" type="button" (click)="removeLink(i)">Remove</button></td></tr>
+      }</tbody></table></div>
+    <div class="row-actions"><button class="btn" type="button" (click)="addLink()">Add link</button><button class="btn primary" type="button" [disabled]="busy()" (click)="saveLinks()">Save links</button></div>
+  </section>
+
+  <section class="card">
+    <h2>Pages</h2>
+    <div class="filters">
+      <div class="field"><label for="pg">Page</label><select id="pg" [ngModel]="pageId()" (ngModelChange)="selectPage($event)">
+        @for (p of pages(); track p.pageId) { <option [ngValue]="p.pageId">{{ p.title }} (/{{ p.slug }})</option> }</select></div>
+      <div class="field"><label for="np">New page title</label><input id="np" type="text" [(ngModel)]="newTitle" maxlength="160" /></div>
+      <button class="btn" type="button" (click)="createPage()">Create page</button>
+    </div>
+    @if (current(); as p) {
+      <div class="grid cols-2">
+        <div class="field"><label for="pt">Title</label><input id="pt" type="text" [(ngModel)]="p.title" maxlength="160" /></div>
+        <div class="field"><label class="lbl"><input type="checkbox" [(ngModel)]="p.published" [disabled]="p.slug === 'home'" /> Published</label></div>
+      </div>
+      @for (b of p.blocks; track $index; let i = $index) {
+        <fieldset class="card block">
+          <legend>Block {{ i + 1 }}</legend>
+          <div class="grid cols-3">
+            <div class="field"><label>Type</label><select [(ngModel)]="b.type" [name]="'bt' + i">@for (t of blockTypes; track t) { <option [value]="t">{{ t }}</option> }</select></div>
+            <div class="field"><label>Title</label><input type="text" [(ngModel)]="b.title" [name]="'btl' + i" maxlength="200" /></div>
+            <div class="field"><label>Subtitle</label><input type="text" [(ngModel)]="b.subtitle" [name]="'bst' + i" maxlength="300" /></div>
+            <div class="field"><label>Image URL</label><input type="text" [(ngModel)]="b.imageUrl" [name]="'bim' + i" maxlength="300" /></div>
+            <div class="field"><label>Link URL</label><input type="text" [(ngModel)]="b.linkUrl" [name]="'bli' + i" maxlength="300" /></div>
+            <div class="field"><label>Button label</label><input type="text" [(ngModel)]="b.ctaLabel" [name]="'bct' + i" maxlength="60" /></div>
+          </div>
+          <div class="field"><label>Body (plain text)</label><textarea rows="3" [(ngModel)]="b.body" [name]="'bbo' + i" maxlength="8000"></textarea></div>
+          @if (b.type === 'FEATURED_PRODUCTS') {
+            <div class="grid cols-3">
+              <div class="field"><label>Products shown</label><select [(ngModel)]="b.productRule" [name]="'bpr' + i">@for (r of rules; track r) { <option [value]="r">{{ r }}</option> }</select></div>
+              @if (b.productRule === 'CATEGORY') { <div class="field"><label>Category</label><select [(ngModel)]="b.categoryId" [name]="'bca' + i">@for (c of categories(); track c.categoryId) { <option [ngValue]="c.categoryId">{{ c.name }}</option> }</select></div> }
+              <div class="field"><label>How many</label><input type="number" min="1" max="24" [(ngModel)]="b.itemLimit" [name]="'bil' + i" /></div>
+            </div>
+          }
+          <div class="row-actions">
+            <label class="lbl"><input type="checkbox" [(ngModel)]="b.published" [name]="'bpu' + i" /> Visible</label>
+            <button class="btn sm" type="button" [disabled]="i === 0" (click)="move(i, -1)">Move up</button>
+            <button class="btn sm" type="button" [disabled]="i === p.blocks.length - 1" (click)="move(i, 1)">Move down</button>
+            <button class="btn sm danger" type="button" (click)="removeBlock(i)">Remove</button>
+          </div>
+        </fieldset>
+      }
+      <div class="row-actions"><button class="btn" type="button" (click)="addBlock()">Add block</button><button class="btn primary" type="button" [disabled]="busy()" (click)="savePage()">Save page</button></div>
+    }
+  </section>
+</admin-state>

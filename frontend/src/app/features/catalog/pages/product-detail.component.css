@@ -1,0 +1,20 @@
+.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
+@media (min-width: 900px) { .cols { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--sp-7); } .info { position: sticky; top: 140px; } }
+.info h1 { font-family: var(--font-heading); font-size: clamp(1.7rem, 3vw, 2.3rem); line-height: 1.15; margin: var(--sp-1) 0 var(--sp-3); }
+.price { font-size: 1.6rem; display: flex; gap: var(--sp-3); align-items: baseline; margin: 0 0 var(--sp-2); }
+.stock { display: inline-flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; color: var(--c-ok); margin: 0 0 var(--sp-4); padding: 4px 12px; border-radius: 999px; background: color-mix(in srgb, var(--c-ok) 12%, transparent); }
+.stock.bad { color: var(--c-danger); background: color-mix(in srgb, var(--c-danger) 10%, transparent); }
+.buy { display: flex; gap: var(--sp-3); align-items: center; margin: 0 0 var(--sp-5); padding-bottom: var(--sp-5); border-bottom: 1px solid var(--c-border); }
+.buy .qty { height: var(--control-h-lg); flex: none; }
+.buy .grow { flex: 1; min-width: 0; }
+.buy .btn-icon { width: var(--control-h-lg); padding: 0; flex: none; }
+.block { margin: 0 0 var(--sp-5); }
+.block h2 { font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; font-family: var(--font-body); color: var(--c-muted); margin: 0 0 var(--sp-2); }
+.block p { margin: 0; line-height: 1.65; }
+.attrs { display: grid; margin: 0; border: 1px solid var(--c-border); border-radius: var(--radius); overflow: hidden; background: var(--c-surface); }
+.attrs div { display: flex; gap: var(--sp-3); padding: 12px var(--sp-4); }
+.attrs div + div { border-top: 1px solid var(--c-border); }
+dt { width: 130px; flex: none; color: var(--c-muted); } dd { margin: 0; }
+.trust { list-style: none; padding: var(--sp-4) 0 0; margin: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); font-size: .85rem; color: var(--c-muted); }
+.trust li { display: inline-flex; align-items: center; gap: 8px; } .trust app-icon { color: var(--c-accent); }
+.section-title { text-align: center; font-family: var(--font-heading); margin: var(--sp-7) 0 var(--sp-5); }

@@ -1,0 +1,18 @@
+.stack { position: fixed; top: 16px; right: 16px; z-index: 5000; display: grid; gap: 12px; width: min(380px, calc(100vw - 24px)); pointer-events: none; }
+.pop { --tone: #2f9e63; --tone2: #8fdcae; position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 16px 38px 18px 16px; overflow: hidden;
+  background: linear-gradient(180deg, var(--c-surface), var(--c-subtle)); border: 1px solid var(--c-border); border-radius: 12px; box-shadow: 0 10px 28px rgba(30, 41, 59, .18), 0 2px 6px rgba(30, 41, 59, .08);
+  pointer-events: auto; animation: pop-in .22s ease-out; }
+.pop.error { --tone: #e0392d; --tone2: #f5a29b; }
+.pop.warn { --tone: #d98a0b; --tone2: #f3cd86; }
+.pop.info { --tone: #3563d6; --tone2: #9db7f2; }
+.badge { flex: none; width: 40px; height: 40px; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .18)); }
+.badge polygon { fill: var(--tone); stroke: var(--tone); stroke-width: 1.2; }
+.body { min-width: 0; }
+.title { margin: 0 0 2px; font-weight: 700; font-size: 1rem; color: var(--c-text); }
+.text { margin: 0; font-size: .875rem; line-height: 1.35; color: var(--c-muted); overflow-wrap: anywhere; }
+.close { position: absolute; top: 8px; right: 10px; border: 0; background: none; color: var(--c-muted); font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 2px 4px; }
+.close:hover { color: var(--c-text); }
+.bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: linear-gradient(90deg, var(--tone2), var(--tone)); transform-origin: left; animation: countdown linear forwards; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .pop { animation: none; } .bar { animation: none; transform: none; } }
